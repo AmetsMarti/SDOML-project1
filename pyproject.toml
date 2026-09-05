@@ -17,15 +17,9 @@ classifiers = [
 dependencies = [
     "numpy",
     "pandas",
-    "scikit-learn",
-    "matplotlib",
-    "seaborn",
-    "scipy",
-    "jupyterlab",
-    "torch",
-    "torchvision",
-    "torchinfo",
-    "python-dotenv",
+    "datasets",
+    "soundfile",
+    "ipykernel",
 ]
 
 requires-python = ">=3.12"
