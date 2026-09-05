@@ -20,6 +20,8 @@ dependencies = [
     "datasets",
     "soundfile",
     "ipykernel",
+    "seaborn>=0.13.2",
+    "matplotlib>=3.11.1",
 ]
 
 requires-python = ">=3.12"
