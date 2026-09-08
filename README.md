@@ -1,15 +1,12 @@
 # sdoml-task1
 
-Write a README.md explaining what the project does, what needs to be installed, the data
-source, and how to run the code. We should be able to follow it without guessing.
-
 ## Project 1: Project Structure, Training and Visualization
 
 ### Overview
-This project lays the foundation for a machine learning project that will grow throughtout the semester. For the first part, we are required to create the structure for the ML project, train a simple model on a public dataset, visually explore the dataset and evaluate the model's performance.
+This project lays the foundation for a machine learning project that will grow throughout the semester. For the first part, we are required to create the structure for the ML project, train a simple model on a public dataset, visually explore the dataset and evaluate the model's performance.
 
 ### Project description
-This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. It uses the Adam optimizer and the Cross Entropy Loss function.
+This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. It uses the Adam optimizer and the cross-entropy loss function.
 
 ### Running the code
 In order to run the jupyter notebook, you can use `uv sync` to create an environment and synchronize the dependencies. Depending on your code editor, you might need to manually select the created environment as a Python kernel. For a more detailed description of all the project's requirements, please check `pyproject.toml`
