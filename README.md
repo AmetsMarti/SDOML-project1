@@ -1,12 +1,21 @@
 # sdoml-task1
 
+## Project 1: Project Structure, Training and Visualization
+
+### Overview
+This project lays the foundation for a machine learning project that will grow throughout the semester. For the first part, we are required to create the structure for the ML project, train a simple model on a public dataset, visually explore the dataset and evaluate the model's performance.
+
+### Project description
+This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. It uses the Adam optimizer and the cross-entropy loss function.
+
+### Running the code
+In order to run the jupyter notebook, you can use `uv sync` to create an environment and synchronize the dependencies. Depending on your code editor, you might need to manually select the created environment as a Python kernel. For a more detailed description of all the project's requirements, please check `pyproject.toml`
+
+### Project Organization
+The project is organized by making use of the [cookie cutter template](https://cookiecutter-data-science.drivendata.org/)
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
     <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
 </a>
-
-A short description of the project.
-
-## Project Organization
 
 ```
 ├── LICENSE            <- Open-source license if one is chosen
