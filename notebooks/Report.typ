@@ -147,9 +147,16 @@ Above, we show the changes between the first round, the 10th round, and the 40th
 
 #v(1em)
 
+#figure(
+  image("../assets/loss_accuracy.png", width: 80%),
+  caption: [Training and validation loss/accuracy over 40 epochs]
+)
 
+The curves confirm what the confusion matrices already suggested: most of the learning happens very early. The training loss drops from 7.99 at epoch 1 to 0.48 by epoch 5, while training accuracy jumps from 21.8% to 85.7% over the same span. Validation follows the same pattern, going from 39.2% to 84.0% accuracy in the first 5 epochs.
 
-todo : loss / accuracy
+From there, both curves keep improving but at a much slower pace, and after roughly epoch 15-20 a gap opens up between training and validation performance: training loss keeps decreasing steadily down to 0.12 at epoch 40, whereas validation loss flattens out around 0.26-0.27 and even fluctuates slightly from one epoch to the next. Training accuracy reaches 96.1% by the end, while validation accuracy plateaus around 92-93% from epoch 30 onward, finishing at 92.3%. This divergence between the training and validation curves is a sign of mild overfitting, though it is not severe since validation accuracy does not degrade, it simply stops improving while the model keeps fitting the training set a bit closer.
+
+Results suggests that training much beyond 20-25 epochs brings little extra generalization: the model reaches close to its final validation accuracy (~91%) around that point already, and the remaining epochs mostly let it memorize the training data further. An early-stopping criterion on the validation loss would likely have given a comparable final result with less training time.
 
 
 == 4. Conclusions
