@@ -13,7 +13,7 @@
 
    #v(1em)
 
-  Teva Philippe - Alvaro ... - Amets ...
+  Teva Philippe - Alvaro Crespo - Amets Marti
 ]
 
 #v(1em)
@@ -55,6 +55,8 @@ It is worth noting that the data is generally balanced. However, regarding accen
 
 == 3. Data Exploration
 
+#v(1em)
+
 To begin with, we created 4 graphs, 3 using matplotlib and 1 using seaborn:
 
 #grid(
@@ -95,6 +97,8 @@ For the next part, we need the recordings because we are moving on to the ML sec
 
 == Model Architecture
 
+#v(1em)
+
 We chose to use PyTorch to build and train our
 classification model.
 
@@ -103,7 +107,19 @@ The 26 features extracted from each audio recording are first passed to a
 fully connected layer of 64 neurons. Note that this value was chosen arbitrarily.
 We then reduce this to 10 neurons corresponding to the ten possible digits.
 
-It should be noted that at first, we were reducing from 64 to 32 and then to 10 neurons. However, the results were rather stagnant and it seemed that our model was memorizing the data. Reducing directly from 64 to 10 solved this issue. The results are not significantly better in the end, but we can now observe an evolution, which we recorded here over 40 epochs, i.e. 40 passes through the training data.
+It should be noted that initially, we reduced the number of neurons from 64 to 32, and then to 10. However, the results plateaued somewhat, and we hypothesize—though this should be taken with a grain of salt since we are not certain—that the model was memorizing the data. Going directly from 64 to 10 neurons seems to have resolved this issue. A second parameter we varied is...
+
+(I’ll let you explain this one)
+
+The results aren’t significantly better in the end, but we can now observe a trend, which we recorded here over 40 epochs—that is, 40 passes through the training data.
+
+== Confusion matrice
+
+#v(1em)
+
+In any case, in practice, we have managed to produce results that we find interesting.
+
+We created confusion matrices for each epoch to verify the actual results produced by our model. You can see, for each training epoch (i.e., across 2,400 data points), the results produced by our model
 
 
 #grid(
@@ -125,4 +141,17 @@ It should be noted that at first, we were reducing from 64 to 32 and then to 10 
    ),
 )
 
-todo : loss / accuracy 
+Above, we show the changes between the first round, the 10th round, and the 40th round. The loss continues to decrease (albeit slowly) and the accuracy continues to increase (albeit slowly) even after 40 rounds, but it is especially in the first rounds that the results seem to suggest that our model is learning.
+
+== Loss / Accuracy
+
+#v(1em)
+
+
+
+todo : loss / accuracy
+
+
+== 4. Conclusions
+
+todo
