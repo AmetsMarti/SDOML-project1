@@ -4,7 +4,7 @@
 
 #align(center)[
    #text(size: 16pt, weight: "bold")[
-    Report Software Development Oriented to Machine Learning
+    Spoken Digit Recognition
    ]
 
    #text(size: 13pt, weight: "bold")[
@@ -12,8 +12,7 @@
    ]
 
    #v(1em)
-
-  Teva Philippe - Alvaro Crespo - Amets Marti
+  Teva Philippe - Alvaro Crespo - Amets Martiarena
 ]
 
 #v(1em)
@@ -23,21 +22,23 @@
 #v(1em)
 
 This first practice constitutes the first step in setting up our machine learning project. The objective is
-to integrate a public dataset, train a simple classification model, and analyze its performance.
+to integrate a public dataset, train a simple machine learning model, and analyze its performance.
 
 We chose to work on digit classification. The principle is similar
-to *MNIST*, which allows digits to be recognized from images, but here we use audio recordings instead.
+to *MNIST*, which allows digits to be recognized from images, but here we use audio recordings instead. We decided to use this dataset because while having the rarity of being audio files, digit recognition is a known problem and the dataset is reliable.
 
 = 2. Project Structure and Dataset
+
+In this section we will explain the project structure and make a brief explanation about the selected dataset.
 
 == Project Structure
 
 #v(1em)
 
 In order to organize our project in a clear and professional manner, we
-used *Cookiecutter Data Science* to set up the project structure.
+used Cookiecutter Data Science to set up the project structure. Due to the small amount of extra code that is needed, we have used the structure to follow the convention, asset storing and report writing. 
 
-== Dataset
+ == Dataset
 
 #v(1em)
 
@@ -46,9 +47,8 @@ dataset, which contains images representing digits from 0 to 9, Audio MNIST cont
 
 Each example is associated with a digit between 0 and 9. For each file, we also have access to metadata such as the speaker's accent, age, and gender.
 
-We have access to 3000 recordings divided into 2 groups:
-2400 for the training data group
-600 for the test data group
+We have access to 30000 recordings divided into 2 groups:
+24000 samples for the training data group and 6000 samples the test data group.
 
 It is worth noting that the data is generally balanced. However, regarding accents, we observed that the German accent was more represented in the training data, but we will not focus on this aspect here.
 
@@ -57,7 +57,7 @@ It is worth noting that the data is generally balanced. However, regarding accen
 
 #v(1em)
 
-To begin with, we created 4 graphs, 3 using matplotlib and 1 using seaborn:
+The dataset has digit labels and speakers metadata information, for the classification problem only the digits labels are esential. But we will analyze some of the speakers information in order to find unbalanced data and biases that the classifier could have
 
 #grid(
   columns: (1fr, 1fr),
@@ -88,12 +88,11 @@ To begin with, we created 4 graphs, 3 using matplotlib and 1 using seaborn:
    )
 )
 
-
-For this part, we first built our dataset without the audio files, since they were not necessary at this stage.
-
-For the next part, we need the recordings because we are moving on to the ML section. We thought about how to provide the audio files to our model and found librosa, a library that allows us to transform the audio into a sequence of 26 digits.
+looking to the first plot, we can see that the male speakers are far superior than the female speakers. Following with the distribution of the audios by speaker's age, most of the aduios have speakers between 25 and 25 years. Finally the majority of the accents are German. As a summary we can say that this dataset has not a corret demographic representation and could be biased.
 
 = Model and Training
+
+In this section we will introduce the model architecture that we will train as an spoken digit classifier and the training process for it.
 
 == Model Architecture
 
@@ -102,18 +101,19 @@ For the next part, we need the recordings because we are moving on to the ML sec
 We chose to use PyTorch to build and train our
 classification model.
 
-The architecture is based on the example from Unit 2.2 of the course.
+The architecture is a Multilayer Perceptron adapted to the MFCC output 26 features.
 The 26 features extracted from each audio recording are first passed to a
 fully connected layer of 64 neurons. Note that this value was chosen arbitrarily.
 We then reduce this to 10 neurons corresponding to the ten possible digits.
 
-It should be noted that initially, we reduced the number of neurons from 64 to 32, and then to 10. However, the results plateaued somewhat, and we hypothesize—though this should be taken with a grain of salt since we are not certain—that the model was memorizing the data. Going directly from 64 to 10 neurons seems to have resolved this issue. A second parameter we varied is...
+In the other hand, due to the bad results we had in the first iterations, we tried reducing the learning rate of the optimizer from 1e-3 to 1e-4.
 
-(I’ll let you explain this one)
+It should be noted that initially, we reduced the number of neurons from 64 to 32, and then to 10. However, the results plateaued somewhat, and we hypothesize—though this should be taken with a grain of salt since we are not certain—that the model was memorizing the data. Going directly from 64 to 10 neurons seems to have resolved this issue. 
 
-The results aren’t significantly better in the end, but we can now observe a trend, which we recorded here over 40 epochs—that is, 40 passes through the training data.
+After 40 epochs the training reached to a decent accuracy of 0.92.
 
 == Confusion matrice
+To display the performance evolution of the model, we've saved the confusion matrices in different epochs.
 
 #v(1em)
 
@@ -141,7 +141,7 @@ We created confusion matrices for each epoch to verify the actual results produc
    ),
 )
 
-Above, we show the changes between the first round, the 10th round, and the 40th round. The loss continues to decrease (albeit slowly) and the accuracy continues to increase (albeit slowly) even after 40 rounds, but it is especially in the first rounds that the results seem to suggest that our model is learning.
+Above, we show the changes between the first round, the 10th round, and the 40th round. The loss continues to decrease and the accuracy continues to increase  even after 40 rounds, but it is especially in the first rounds that the results seem to suggest that our model is learning.
 
 == Loss / Accuracy
 
