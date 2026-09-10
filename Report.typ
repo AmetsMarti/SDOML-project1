@@ -88,7 +88,7 @@ The dataset has digit labels and speakers metadata information, for the classifi
    )
 )
 
-looking to the first plot, we can see that the male speakers are far superior than the female speakers. Following with the distribution of the audios by speaker's age, most of the aduios have speakers between 25 and 25 years. Finally the majority of the accents are German. As a summary we can say that this dataset has not a corret demographic representation and could be biased.
+Looking to the first plot, we can see that the male speakers are far superior than the female speakers. Following with the distribution of the audios by speaker's age, most of the aduios have speakers between 25 and 25 years. Finally the majority of the accents are German. As a summary we can say that this dataset has not a corret demographic representation and could be biased.
 
 = Model and Training
 
