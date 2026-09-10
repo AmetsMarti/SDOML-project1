@@ -9,7 +9,7 @@ This project lays the foundation for a machine learning project that will grow t
 This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. It uses the Adam optimizer and the cross-entropy loss function.
 
 ### Running the code
-In order to run the jupyter notebook, you can use `uv sync` to create an environment and synchronize the dependencies. Depending on your code editor, you might need to manually select the created environment as a Python kernel. For a more detailed description of all the project's requirements, please check `pyproject.toml`
+In order to run the jupyter notebook, you can use `uv sync` to create an environment and synchronize the dependencies. Depending on your code editor, you might need to manually select the created environment as a Python kernel. For a more detailed description of all the project's requirements, please check `pyproject.toml`. The notebooks are divided into two: The 00 notebook downloads and visualizes the data. The 01 notebooks performs the feature extracion and model training.
 
 ### Project Organization
 The project is organized by making use of the [cookie cutter template](https://cookiecutter-data-science.drivendata.org/)
