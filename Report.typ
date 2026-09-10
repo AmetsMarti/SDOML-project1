@@ -60,35 +60,34 @@ It is worth noting that the data is generally balanced. However, regarding accen
 The dataset has digit labels and speakers metadata information, for the classification problem only the digits labels are esential. But we will analyze some of the speakers information in order to find unbalanced data and biases that the classifier could have
 
 #grid(
-  columns: (1fr, 1fr),
+  columns: (1fr),
   gutter: 1em,
 
    figure(
-   image("assets/figure1.png", width: 100%),
+   image("assets/dataset_gender_distribution.png", width: 100%),
    caption: [Bar Chart]
-   ),
-
-   figure(
-   image("assets/figure2.png", width: 100%),
-   caption: [Histogram]
    )
 )
 
 #grid(
-  columns: (1fr, 1fr),
+  columns: (1fr),
   gutter: 1em,
    figure(
-   image("assets/figure3.png", width: 100%),
-   caption: [Bar Chart]
-   ),
-
-   figure(
-   image("assets/figure4.png", width: 100%),
+   image("assets/dataset_accent_distribution.png", width: 100%),
    caption: [Boxplot]
    )
 )
 
-looking to the first plot, we can see that the male speakers are far superior than the female speakers. Following with the distribution of the audios by speaker's age, most of the aduios have speakers between 25 and 25 years. Finally the majority of the accents are German. As a summary we can say that this dataset has not a corret demographic representation and could be biased.
+#grid(
+  columns: (1fr),
+  gutter: 1em,
+   figure(
+   image("assets/dataset_age_gender.png", width: 100%),
+   caption: [Boxplot]
+   )
+)
+
+Looking to the first plot, we can see that the male speakers are far superior than the female speakers. Following with the distribution of the audios by speaker's age, most of the aduios have speakers between 25 and 25 years. Finally the majority of the accents are German. As a summary we can say that this dataset has not a corret demographic representation and could be biased.
 
 = Model and Training
 
