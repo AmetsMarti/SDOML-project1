@@ -27,7 +27,7 @@ The project is organized by making use of the [cookie cutter template](https://c
 │   ├── processed      <- The final, canonical data sets for modeling.
 │   └── raw            <- The original, immutable data dump.
 │
-├── docs               <- A default mkdocs project; see www.mkdocs.org for details
+├── docs               <- Contain documentation of the project
 │
 ├── models             <- Trained and serialized models, model predictions, or model summaries
 │
@@ -67,4 +67,12 @@ The project is organized by making use of the [cookie cutter template](https://c
 ```
 
 --------
+
+### Documentation
+
+You can access to the pdoc documentation of the project in docs -> sdoml_task1 -> index.html .
+
+
+
+
 
