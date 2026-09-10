@@ -161,4 +161,8 @@ Results suggests that training much beyond 20-25 epochs brings little extra gene
 
 == 4. Conclusions
 
-todo
+We built a model using Cookiecutter, analyzed a dataset of audio files using Matplotlib and Seaborn, converted the audio files into numerical data using MFCCs, and created and trained a model using PyTorch.
+
+After changing the number of neurons and the learning rate we notice these changes improved the results and found that the model seemed to be learning but we’re still not sure about the relevance of what we did.
+
+The confusion matrices helped us understand the results provided by our model, and with the loss and accuracy graphs, we can see that our model is more accurate and more confident. It seems to us that it has “learned” as we had hoped.
