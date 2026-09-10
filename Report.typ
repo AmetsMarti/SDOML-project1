@@ -64,12 +64,12 @@ The dataset has digit labels and speakers metadata information, for the classifi
   gutter: 1em,
 
    figure(
-   image("../assets/figure1.png", width: 100%),
+   image("assets/figure1.png", width: 100%),
    caption: [Bar Chart]
    ),
 
    figure(
-   image("../assets/figure2.png", width: 100%),
+   image("assets/figure2.png", width: 100%),
    caption: [Histogram]
    )
 )
@@ -78,12 +78,12 @@ The dataset has digit labels and speakers metadata information, for the classifi
   columns: (1fr, 1fr),
   gutter: 1em,
    figure(
-   image("../assets/figure3.png", width: 100%),
+   image("assets/figure3.png", width: 100%),
    caption: [Bar Chart]
    ),
 
    figure(
-   image("../assets/figure4.png", width: 100%),
+   image("assets/figure4.png", width: 100%),
    caption: [Boxplot]
    )
 )
@@ -126,17 +126,17 @@ We created confusion matrices for each epoch to verify the actual results produc
   columns: (1fr, 1fr),
   gutter: 1em,
    figure(
-   image("../assets/confusion1.png", width: 100%),
+   image("assets/confusion1.png", width: 100%),
    caption: [Confusion 1]
    ),
 
    figure(
-   image("../assets/confusion10.png", width: 100%),
+   image("assets/confusion10.png", width: 100%),
    caption: [Confusion 10]
    ),
 
    figure(
-   image("../assets/confusion40.png", width: 100%),
+   image("assets/confusion40.png", width: 100%),
    caption: [Confusion 40]
    ),
 )
@@ -148,7 +148,7 @@ Above, we show the changes between the first round, the 10th round, and the 40th
 #v(1em)
 
 #figure(
-  image("../assets/loss_accuracy.png", width: 80%),
+  image("assets/loss_accuracy.png", width: 80%),
   caption: [Training and validation loss/accuracy over 40 epochs]
 )
 
