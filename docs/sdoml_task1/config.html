@@ -64,23 +64,20 @@
                     <h1 class="modulename">
 <a href="./../sdoml_task1.html">sdoml_task1</a><wbr>.config    </h1>
 
-                        <div class="docstring"><p>Store useful variables and configuration.</p>
-</div>
-
+                
                         <input id="mod-config-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 
                         <label class="view-source-button" for="mod-config-view-source"><span>View Source</span></label>
 
-                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="sd">"""Store useful variables and configuration."""</span>
-</span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="n">PROJECT_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">PROJECT_DIR</span> <span class="o">/</span> <span class="s2">"data"</span>
-</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="n">RAW_DATA_DIR</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">"raw"</span>
-</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="n">PROCESSED_DATA_DIR</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">"processed"</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="n">MODEL_DIR</span> <span class="o">=</span> <span class="n">PROJECT_DIR</span> <span class="o">/</span> <span class="s2">"models"</span>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="n">N_MFCC</span> <span class="o">=</span> <span class="mi">13</span>
+                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">1</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span id="L-2"><a href="#L-2"><span class="linenos">2</span></a>
+</span><span id="L-3"><a href="#L-3"><span class="linenos">3</span></a><span class="n">PROJECT_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parents</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos">4</span></a><span class="n">DATA_DIR</span> <span class="o">=</span> <span class="n">PROJECT_DIR</span> <span class="o">/</span> <span class="s2">"data"</span>
+</span><span id="L-5"><a href="#L-5"><span class="linenos">5</span></a><span class="n">RAW_DATA_DIR</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">"raw"</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos">6</span></a><span class="n">PROCESSED_DATA_DIR</span> <span class="o">=</span> <span class="n">DATA_DIR</span> <span class="o">/</span> <span class="s2">"processed"</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos">7</span></a><span class="n">MODEL_DIR</span> <span class="o">=</span> <span class="n">PROJECT_DIR</span> <span class="o">/</span> <span class="s2">"models"</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos">8</span></a>
+</span><span id="L-9"><a href="#L-9"><span class="linenos">9</span></a><span class="n">N_MFCC</span> <span class="o">=</span> <span class="mi">13</span>
 </span></pre></div>
 
 
@@ -88,7 +85,7 @@
                 <section id="PROJECT_DIR">
                     <div class="attr variable">
             <span class="name">PROJECT_DIR</span>        =
-<span class="default_value">WindowsPath(&#39;C:/Users/Teva/Desktop/Repertoire trié/Cours/Erasmus/Practice1/SDOML-project1&#39;)</span>
+<span class="default_value">PosixPath(&#39;/home/amets/Documents/MASTER/SDOML/project/SDOML-project1&#39;)</span>
 
         
     </div>
@@ -100,7 +97,7 @@
                 <section id="DATA_DIR">
                     <div class="attr variable">
             <span class="name">DATA_DIR</span>        =
-<span class="default_value">WindowsPath(&#39;C:/Users/Teva/Desktop/Repertoire trié/Cours/Erasmus/Practice1/SDOML-project1/data&#39;)</span>
+<span class="default_value">PosixPath(&#39;/home/amets/Documents/MASTER/SDOML/project/SDOML-project1/data&#39;)</span>
 
         
     </div>
@@ -112,7 +109,7 @@
                 <section id="RAW_DATA_DIR">
                     <div class="attr variable">
             <span class="name">RAW_DATA_DIR</span>        =
-<span class="default_value">WindowsPath(&#39;C:/Users/Teva/Desktop/Repertoire trié/Cours/Erasmus/Practice1/SDOML-project1/data/raw&#39;)</span>
+<span class="default_value">PosixPath(&#39;/home/amets/Documents/MASTER/SDOML/project/SDOML-project1/data/raw&#39;)</span>
 
         
     </div>
@@ -124,8 +121,7 @@
                 <section id="PROCESSED_DATA_DIR">
                     <div class="attr variable">
             <span class="name">PROCESSED_DATA_DIR</span>        =
-<input id="PROCESSED_DATA_DIR-view-value" class="view-value-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
-            <label class="view-value-button pdoc-button" for="PROCESSED_DATA_DIR-view-value"></label><span class="default_value">WindowsPath(&#39;C:/Users/Teva/Desktop/Repertoire trié/Cours/Erasmus/Practice1/SDOML-project1/data/processed&#39;)</span>
+<span class="default_value">PosixPath(&#39;/home/amets/Documents/MASTER/SDOML/project/SDOML-project1/data/processed&#39;)</span>
 
         
     </div>
@@ -137,7 +133,7 @@
                 <section id="MODEL_DIR">
                     <div class="attr variable">
             <span class="name">MODEL_DIR</span>        =
-<span class="default_value">WindowsPath(&#39;C:/Users/Teva/Desktop/Repertoire trié/Cours/Erasmus/Practice1/SDOML-project1/models&#39;)</span>
+<span class="default_value">PosixPath(&#39;/home/amets/Documents/MASTER/SDOML/project/SDOML-project1/models&#39;)</span>
 
         
     </div>

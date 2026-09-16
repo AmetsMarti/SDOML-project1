@@ -1,12 +1,30 @@
-"""Training loop for classification models."""
+"""Training loop for classification models.
 
+This module implements the training loop for the digit classification model,
+including validation evaluation and confusion matrix computation at each epoch.
+
+Functions
+---------
+train(model, train_loader, val_loader, epochs, lr, device)
+    Train a classifier and return per-epoch metrics.
+"""
 from sklearn.metrics import confusion_matrix
 import torch
 from torch import nn
 
 
-def train(model, train_loader, val_loader, epochs=40, lr=1e-4, device=None):
+def train(
+    model: torch.nn.Module,
+    train_loader,
+    val_loader,
+    epochs: int = 40,
+    lr: float = 1e-4,
+    device=None,
+) -> dict:
     """Train a classifier and return metrics per epoch.
+
+    Uses Adam optimizer and cross-entropy loss. Tracks training and
+    validation loss, accuracy, and confusion matrices at each epoch.
 
     Parameters
     ----------
@@ -16,23 +34,24 @@ def train(model, train_loader, val_loader, epochs=40, lr=1e-4, device=None):
         Training data loader.
     val_loader : torch.utils.data.DataLoader
         Validation data loader.
-    epochs : int, optional
-        Number of training epochs. Default is 40.
-    lr : float, optional
-        Learning rate for Adam optimizer. Default is 1e-4.
+    epochs : int, default=40
+        Number of training epochs.
+    lr : float, default=1e-4
+        Learning rate for Adam optimizer.
     device : str or torch.device, optional
-        Device to use. If None, auto-detects cuda/cpu.
+        Device to use for training. If ``None``, auto-detects CUDA or CPU.
 
     Returns
     -------
     dict
-        Dictionary with:
-        - ``loss_train``: list of training loss per epoch.
-        - ``accuracy_train``: list of training accuracy per epoch.
-        - ``loss_val``: list of validation loss per epoch.
-        - ``accuracy_val``: list of validation accuracy per epoch.
-        - ``confusion_matrices``: list of confusion matrices (np.ndarray) per epoch.
-        - ``model``: the trained model.
+        Dictionary containing:
+
+        - ``"loss_train"`` : list of float -- Training loss per epoch.
+        - ``"accuracy_train"`` : list of float -- Training accuracy per epoch.
+        - ``"loss_val"`` : list of float -- Validation loss per epoch.
+        - ``"accuracy_val"`` : list of float -- Validation accuracy per epoch.
+        - ``"confusion_matrices"`` : list of np.ndarray -- Confusion matrices per epoch.
+        - ``"model"`` : torch.nn.Module -- The trained model.
     """
     if device is None:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -28,6 +28,19 @@
 
 
 
+            <h2>API Documentation</h2>
+                <ul class="memberlist">
+            <li>
+                    <a class="function" href="#plot_loss_accuracy">plot_loss_accuracy</a>
+            </li>
+            <li>
+                    <a class="function" href="#plot_confusion_matrices">plot_confusion_matrices</a>
+            </li>
+            <li>
+                    <a class="function" href="#plot_confusion_matrix_epoch">plot_confusion_matrix_epoch</a>
+            </li>
+    </ul>
+
 
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev" target="_blank">
@@ -42,18 +55,334 @@
                     <h1 class="modulename">
 <a href="./../sdoml_task1.html">sdoml_task1</a><wbr>.plots    </h1>
 
-                        <div class="docstring"><p>Code to create visualizations.</p>
-</div>
-
+                
                         <input id="mod-plots-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 
                         <label class="view-source-button" for="mod-plots-view-source"><span>View Source</span></label>
 
-                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">1</span></a><span class="sd">"""Code to create visualizations."""</span>
+                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+</span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">ConfusionMatrixDisplay</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a>
+</span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a>
+</span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a><span class="k">def</span><span class="w"> </span><span class="nf">plot_loss_accuracy</span><span class="p">(</span><span class="n">metrics</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="w">    </span><span class="sd">"""Plot training and validation loss/accuracy curves.</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a>
+</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="sd">    Creates a 2x2 subplot grid showing training loss, training accuracy,</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="sd">    validation loss, and validation accuracy across epochs.</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a>
+</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="sd">    Parameters</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="sd">    ----------</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="sd">    metrics : dict</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="sd">        Output from :func:`sdoml_task1.modeling.train.train`.</span>
+</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a><span class="sd">        Must contain ``"loss_train"``, ``"accuracy_train"``,</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="sd">        ``"loss_val"``, and ``"accuracy_val"`` keys, each mapping</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="sd">        to a list of per-epoch values.</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a><span class="sd">    save_path : str or pathlib.Path, optional</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a><span class="sd">        If provided, save the figure to this path.</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="sd">    """</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a>    <span class="n">_</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a>    <span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">,</span> <span class="n">ax4</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a>
+</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a>    <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">"loss_train"</span><span class="p">])</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a>    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Epoch"</span><span class="p">)</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a>    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Loss"</span><span class="p">)</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a>    <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Training Loss"</span><span class="p">)</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a>    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a>
+</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a>    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">"accuracy_train"</span><span class="p">])</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Epoch"</span><span class="p">)</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Accuracy"</span><span class="p">)</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Training Accuracy"</span><span class="p">)</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a>    <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a>
+</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a>    <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">"loss_val"</span><span class="p">])</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a>    <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Epoch"</span><span class="p">)</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a>    <span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Loss"</span><span class="p">)</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a>    <span class="n">ax3</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Validation Loss"</span><span class="p">)</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a>    <span class="n">ax3</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>
+</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>    <span class="n">ax4</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">"accuracy_val"</span><span class="p">])</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a>    <span class="n">ax4</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Epoch"</span><span class="p">)</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>    <span class="n">ax4</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Accuracy"</span><span class="p">)</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a>    <span class="n">ax4</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Validation Accuracy"</span><span class="p">)</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>    <span class="n">ax4</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>    <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a><span class="k">def</span><span class="w"> </span><span class="nf">plot_confusion_matrices</span><span class="p">(</span><span class="n">confusion_matrices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a><span class="w">    </span><span class="sd">"""Plot confusion matrices for every epoch.</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a><span class="sd">    Displays confusion matrices in a grid with 5 columns, one matrix</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a><span class="sd">    per epoch.</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a><span class="sd">    Parameters</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a><span class="sd">    ----------</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a><span class="sd">    confusion_matrices : list of np.ndarray</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a><span class="sd">        Confusion matrices, one per epoch. Each is of shape</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a><span class="sd">        ``(n_classes, n_classes)``.</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a><span class="sd">    save_path : str or pathlib.Path, optional</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a><span class="sd">        If provided, save the figure to this path.</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a><span class="sd">    """</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">confusion_matrices</span><span class="p">)</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>    <span class="n">cols</span> <span class="o">=</span> <span class="mi">5</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>    <span class="n">rows</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">cols</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">cols</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>    <span class="n">_</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">cols</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">rows</span><span class="p">))</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>    <span class="n">axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">confusion_matrices</span><span class="p">):</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>        <span class="n">disp</span> <span class="o">=</span> <span class="n">ConfusionMatrixDisplay</span><span class="p">(</span><span class="n">confusion_matrix</span><span class="o">=</span><span class="n">cm</span><span class="p">,</span> <span class="n">display_labels</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>        <span class="n">disp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"Blues"</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Epoch </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>        <span class="n">axes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>    <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a><span class="k">def</span><span class="w"> </span><span class="nf">plot_confusion_matrix_epoch</span><span class="p">(</span><span class="n">cm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a><span class="w">    </span><span class="sd">"""Plot a single confusion matrix.</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a><span class="sd">    Parameters</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a><span class="sd">    ----------</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a><span class="sd">    cm : np.ndarray</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a><span class="sd">        Confusion matrix of shape ``(n_classes, n_classes)``.</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a><span class="sd">    epoch : int</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a><span class="sd">        Epoch number (used in the plot title).</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="sd">    save_path : str or pathlib.Path, optional</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="sd">        If provided, save the figure to this path.</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">    """</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>    <span class="n">disp</span> <span class="o">=</span> <span class="n">ConfusionMatrixDisplay</span><span class="p">(</span><span class="n">confusion_matrix</span><span class="o">=</span><span class="n">cm</span><span class="p">,</span> <span class="n">display_labels</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>    <span class="n">disp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"Blues"</span><span class="p">)</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Confusion Matrix - Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>    <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </span></pre></div>
 
 
             </section>
+                <section id="plot_loss_accuracy">
+                            <input id="plot_loss_accuracy-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">plot_loss_accuracy</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">metrics</span><span class="p">:</span> <span class="nb">dict</span>, </span><span class="param"><span class="n">save_path</span><span class="o">=</span><span class="kc">None</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+                <label class="view-source-button" for="plot_loss_accuracy-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#plot_loss_accuracy"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="plot_loss_accuracy-8"><a href="#plot_loss_accuracy-8"><span class="linenos"> 8</span></a><span class="k">def</span><span class="w"> </span><span class="nf">plot_loss_accuracy</span><span class="p">(</span><span class="n">metrics</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="plot_loss_accuracy-9"><a href="#plot_loss_accuracy-9"><span class="linenos"> 9</span></a><span class="w">    </span><span class="sd">"""Plot training and validation loss/accuracy curves.</span>
+</span><span id="plot_loss_accuracy-10"><a href="#plot_loss_accuracy-10"><span class="linenos">10</span></a>
+</span><span id="plot_loss_accuracy-11"><a href="#plot_loss_accuracy-11"><span class="linenos">11</span></a><span class="sd">    Creates a 2x2 subplot grid showing training loss, training accuracy,</span>
+</span><span id="plot_loss_accuracy-12"><a href="#plot_loss_accuracy-12"><span class="linenos">12</span></a><span class="sd">    validation loss, and validation accuracy across epochs.</span>
+</span><span id="plot_loss_accuracy-13"><a href="#plot_loss_accuracy-13"><span class="linenos">13</span></a>
+</span><span id="plot_loss_accuracy-14"><a href="#plot_loss_accuracy-14"><span class="linenos">14</span></a><span class="sd">    Parameters</span>
+</span><span id="plot_loss_accuracy-15"><a href="#plot_loss_accuracy-15"><span class="linenos">15</span></a><span class="sd">    ----------</span>
+</span><span id="plot_loss_accuracy-16"><a href="#plot_loss_accuracy-16"><span class="linenos">16</span></a><span class="sd">    metrics : dict</span>
+</span><span id="plot_loss_accuracy-17"><a href="#plot_loss_accuracy-17"><span class="linenos">17</span></a><span class="sd">        Output from :func:`sdoml_task1.modeling.train.train`.</span>
+</span><span id="plot_loss_accuracy-18"><a href="#plot_loss_accuracy-18"><span class="linenos">18</span></a><span class="sd">        Must contain ``"loss_train"``, ``"accuracy_train"``,</span>
+</span><span id="plot_loss_accuracy-19"><a href="#plot_loss_accuracy-19"><span class="linenos">19</span></a><span class="sd">        ``"loss_val"``, and ``"accuracy_val"`` keys, each mapping</span>
+</span><span id="plot_loss_accuracy-20"><a href="#plot_loss_accuracy-20"><span class="linenos">20</span></a><span class="sd">        to a list of per-epoch values.</span>
+</span><span id="plot_loss_accuracy-21"><a href="#plot_loss_accuracy-21"><span class="linenos">21</span></a><span class="sd">    save_path : str or pathlib.Path, optional</span>
+</span><span id="plot_loss_accuracy-22"><a href="#plot_loss_accuracy-22"><span class="linenos">22</span></a><span class="sd">        If provided, save the figure to this path.</span>
+</span><span id="plot_loss_accuracy-23"><a href="#plot_loss_accuracy-23"><span class="linenos">23</span></a><span class="sd">    """</span>
+</span><span id="plot_loss_accuracy-24"><a href="#plot_loss_accuracy-24"><span class="linenos">24</span></a>    <span class="n">_</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">8</span><span class="p">))</span>
+</span><span id="plot_loss_accuracy-25"><a href="#plot_loss_accuracy-25"><span class="linenos">25</span></a>    <span class="n">ax1</span><span class="p">,</span> <span class="n">ax2</span><span class="p">,</span> <span class="n">ax3</span><span class="p">,</span> <span class="n">ax4</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+</span><span id="plot_loss_accuracy-26"><a href="#plot_loss_accuracy-26"><span class="linenos">26</span></a>
+</span><span id="plot_loss_accuracy-27"><a href="#plot_loss_accuracy-27"><span class="linenos">27</span></a>    <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">"loss_train"</span><span class="p">])</span>
+</span><span id="plot_loss_accuracy-28"><a href="#plot_loss_accuracy-28"><span class="linenos">28</span></a>    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Epoch"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-29"><a href="#plot_loss_accuracy-29"><span class="linenos">29</span></a>    <span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Loss"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-30"><a href="#plot_loss_accuracy-30"><span class="linenos">30</span></a>    <span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Training Loss"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-31"><a href="#plot_loss_accuracy-31"><span class="linenos">31</span></a>    <span class="n">ax1</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+</span><span id="plot_loss_accuracy-32"><a href="#plot_loss_accuracy-32"><span class="linenos">32</span></a>
+</span><span id="plot_loss_accuracy-33"><a href="#plot_loss_accuracy-33"><span class="linenos">33</span></a>    <span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">"accuracy_train"</span><span class="p">])</span>
+</span><span id="plot_loss_accuracy-34"><a href="#plot_loss_accuracy-34"><span class="linenos">34</span></a>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Epoch"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-35"><a href="#plot_loss_accuracy-35"><span class="linenos">35</span></a>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Accuracy"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-36"><a href="#plot_loss_accuracy-36"><span class="linenos">36</span></a>    <span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Training Accuracy"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-37"><a href="#plot_loss_accuracy-37"><span class="linenos">37</span></a>    <span class="n">ax2</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+</span><span id="plot_loss_accuracy-38"><a href="#plot_loss_accuracy-38"><span class="linenos">38</span></a>
+</span><span id="plot_loss_accuracy-39"><a href="#plot_loss_accuracy-39"><span class="linenos">39</span></a>    <span class="n">ax3</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">"loss_val"</span><span class="p">])</span>
+</span><span id="plot_loss_accuracy-40"><a href="#plot_loss_accuracy-40"><span class="linenos">40</span></a>    <span class="n">ax3</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Epoch"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-41"><a href="#plot_loss_accuracy-41"><span class="linenos">41</span></a>    <span class="n">ax3</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Loss"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-42"><a href="#plot_loss_accuracy-42"><span class="linenos">42</span></a>    <span class="n">ax3</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Validation Loss"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-43"><a href="#plot_loss_accuracy-43"><span class="linenos">43</span></a>    <span class="n">ax3</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+</span><span id="plot_loss_accuracy-44"><a href="#plot_loss_accuracy-44"><span class="linenos">44</span></a>
+</span><span id="plot_loss_accuracy-45"><a href="#plot_loss_accuracy-45"><span class="linenos">45</span></a>    <span class="n">ax4</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">metrics</span><span class="p">[</span><span class="s2">"accuracy_val"</span><span class="p">])</span>
+</span><span id="plot_loss_accuracy-46"><a href="#plot_loss_accuracy-46"><span class="linenos">46</span></a>    <span class="n">ax4</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">"Epoch"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-47"><a href="#plot_loss_accuracy-47"><span class="linenos">47</span></a>    <span class="n">ax4</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">"Accuracy"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-48"><a href="#plot_loss_accuracy-48"><span class="linenos">48</span></a>    <span class="n">ax4</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">"Validation Accuracy"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-49"><a href="#plot_loss_accuracy-49"><span class="linenos">49</span></a>    <span class="n">ax4</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+</span><span id="plot_loss_accuracy-50"><a href="#plot_loss_accuracy-50"><span class="linenos">50</span></a>
+</span><span id="plot_loss_accuracy-51"><a href="#plot_loss_accuracy-51"><span class="linenos">51</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</span><span id="plot_loss_accuracy-52"><a href="#plot_loss_accuracy-52"><span class="linenos">52</span></a>
+</span><span id="plot_loss_accuracy-53"><a href="#plot_loss_accuracy-53"><span class="linenos">53</span></a>    <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="plot_loss_accuracy-54"><a href="#plot_loss_accuracy-54"><span class="linenos">54</span></a>        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</span><span id="plot_loss_accuracy-55"><a href="#plot_loss_accuracy-55"><span class="linenos">55</span></a>
+</span><span id="plot_loss_accuracy-56"><a href="#plot_loss_accuracy-56"><span class="linenos">56</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Plot training and validation loss/accuracy curves.</p>
+
+<p>Creates a 2x2 subplot grid showing training loss, training accuracy,
+validation loss, and validation accuracy across epochs.</p>
+
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>metrics</strong> (dict):
+Output from <code><a href="modeling/train.html#train">sdoml_task1.modeling.train.train()</a></code>.
+Must contain <code>"loss_train"</code>, <code>"accuracy_train"</code>,
+<code>"loss_val"</code>, and <code>"accuracy_val"</code> keys, each mapping
+to a list of per-epoch values.</li>
+<li><strong>save_path</strong> (str or pathlib.Path, optional):
+If provided, save the figure to this path.</li>
+</ul>
+</div>
+
+
+                </section>
+                <section id="plot_confusion_matrices">
+                            <input id="plot_confusion_matrices-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">plot_confusion_matrices</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">confusion_matrices</span><span class="p">:</span> <span class="nb">list</span>, </span><span class="param"><span class="n">save_path</span><span class="o">=</span><span class="kc">None</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+                <label class="view-source-button" for="plot_confusion_matrices-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#plot_confusion_matrices"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="plot_confusion_matrices-59"><a href="#plot_confusion_matrices-59"><span class="linenos">59</span></a><span class="k">def</span><span class="w"> </span><span class="nf">plot_confusion_matrices</span><span class="p">(</span><span class="n">confusion_matrices</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="plot_confusion_matrices-60"><a href="#plot_confusion_matrices-60"><span class="linenos">60</span></a><span class="w">    </span><span class="sd">"""Plot confusion matrices for every epoch.</span>
+</span><span id="plot_confusion_matrices-61"><a href="#plot_confusion_matrices-61"><span class="linenos">61</span></a>
+</span><span id="plot_confusion_matrices-62"><a href="#plot_confusion_matrices-62"><span class="linenos">62</span></a><span class="sd">    Displays confusion matrices in a grid with 5 columns, one matrix</span>
+</span><span id="plot_confusion_matrices-63"><a href="#plot_confusion_matrices-63"><span class="linenos">63</span></a><span class="sd">    per epoch.</span>
+</span><span id="plot_confusion_matrices-64"><a href="#plot_confusion_matrices-64"><span class="linenos">64</span></a>
+</span><span id="plot_confusion_matrices-65"><a href="#plot_confusion_matrices-65"><span class="linenos">65</span></a><span class="sd">    Parameters</span>
+</span><span id="plot_confusion_matrices-66"><a href="#plot_confusion_matrices-66"><span class="linenos">66</span></a><span class="sd">    ----------</span>
+</span><span id="plot_confusion_matrices-67"><a href="#plot_confusion_matrices-67"><span class="linenos">67</span></a><span class="sd">    confusion_matrices : list of np.ndarray</span>
+</span><span id="plot_confusion_matrices-68"><a href="#plot_confusion_matrices-68"><span class="linenos">68</span></a><span class="sd">        Confusion matrices, one per epoch. Each is of shape</span>
+</span><span id="plot_confusion_matrices-69"><a href="#plot_confusion_matrices-69"><span class="linenos">69</span></a><span class="sd">        ``(n_classes, n_classes)``.</span>
+</span><span id="plot_confusion_matrices-70"><a href="#plot_confusion_matrices-70"><span class="linenos">70</span></a><span class="sd">    save_path : str or pathlib.Path, optional</span>
+</span><span id="plot_confusion_matrices-71"><a href="#plot_confusion_matrices-71"><span class="linenos">71</span></a><span class="sd">        If provided, save the figure to this path.</span>
+</span><span id="plot_confusion_matrices-72"><a href="#plot_confusion_matrices-72"><span class="linenos">72</span></a>
+</span><span id="plot_confusion_matrices-73"><a href="#plot_confusion_matrices-73"><span class="linenos">73</span></a><span class="sd">    """</span>
+</span><span id="plot_confusion_matrices-74"><a href="#plot_confusion_matrices-74"><span class="linenos">74</span></a>    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">confusion_matrices</span><span class="p">)</span>
+</span><span id="plot_confusion_matrices-75"><a href="#plot_confusion_matrices-75"><span class="linenos">75</span></a>    <span class="n">cols</span> <span class="o">=</span> <span class="mi">5</span>
+</span><span id="plot_confusion_matrices-76"><a href="#plot_confusion_matrices-76"><span class="linenos">76</span></a>    <span class="n">rows</span> <span class="o">=</span> <span class="p">(</span><span class="n">n</span> <span class="o">+</span> <span class="n">cols</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">//</span> <span class="n">cols</span>
+</span><span id="plot_confusion_matrices-77"><a href="#plot_confusion_matrices-77"><span class="linenos">77</span></a>
+</span><span id="plot_confusion_matrices-78"><a href="#plot_confusion_matrices-78"><span class="linenos">78</span></a>    <span class="n">_</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">cols</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="n">cols</span><span class="p">,</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">rows</span><span class="p">))</span>
+</span><span id="plot_confusion_matrices-79"><a href="#plot_confusion_matrices-79"><span class="linenos">79</span></a>    <span class="n">axes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">axes</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+</span><span id="plot_confusion_matrices-80"><a href="#plot_confusion_matrices-80"><span class="linenos">80</span></a>
+</span><span id="plot_confusion_matrices-81"><a href="#plot_confusion_matrices-81"><span class="linenos">81</span></a>    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">cm</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">confusion_matrices</span><span class="p">):</span>
+</span><span id="plot_confusion_matrices-82"><a href="#plot_confusion_matrices-82"><span class="linenos">82</span></a>        <span class="n">disp</span> <span class="o">=</span> <span class="n">ConfusionMatrixDisplay</span><span class="p">(</span><span class="n">confusion_matrix</span><span class="o">=</span><span class="n">cm</span><span class="p">,</span> <span class="n">display_labels</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</span><span id="plot_confusion_matrices-83"><a href="#plot_confusion_matrices-83"><span class="linenos">83</span></a>        <span class="n">disp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"Blues"</span><span class="p">,</span> <span class="n">colorbar</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="plot_confusion_matrices-84"><a href="#plot_confusion_matrices-84"><span class="linenos">84</span></a>        <span class="n">axes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Epoch </span><span class="si">{</span><span class="n">i</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="plot_confusion_matrices-85"><a href="#plot_confusion_matrices-85"><span class="linenos">85</span></a>
+</span><span id="plot_confusion_matrices-86"><a href="#plot_confusion_matrices-86"><span class="linenos">86</span></a>    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">axes</span><span class="p">)):</span>
+</span><span id="plot_confusion_matrices-87"><a href="#plot_confusion_matrices-87"><span class="linenos">87</span></a>        <span class="n">axes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+</span><span id="plot_confusion_matrices-88"><a href="#plot_confusion_matrices-88"><span class="linenos">88</span></a>
+</span><span id="plot_confusion_matrices-89"><a href="#plot_confusion_matrices-89"><span class="linenos">89</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</span><span id="plot_confusion_matrices-90"><a href="#plot_confusion_matrices-90"><span class="linenos">90</span></a>
+</span><span id="plot_confusion_matrices-91"><a href="#plot_confusion_matrices-91"><span class="linenos">91</span></a>    <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="plot_confusion_matrices-92"><a href="#plot_confusion_matrices-92"><span class="linenos">92</span></a>        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</span><span id="plot_confusion_matrices-93"><a href="#plot_confusion_matrices-93"><span class="linenos">93</span></a>
+</span><span id="plot_confusion_matrices-94"><a href="#plot_confusion_matrices-94"><span class="linenos">94</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Plot confusion matrices for every epoch.</p>
+
+<p>Displays confusion matrices in a grid with 5 columns, one matrix
+per epoch.</p>
+
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>confusion_matrices</strong> (list of np.ndarray):
+Confusion matrices, one per epoch. Each is of shape
+<code>(n_classes, n_classes)</code>.</li>
+<li><strong>save_path</strong> (str or pathlib.Path, optional):
+If provided, save the figure to this path.</li>
+</ul>
+</div>
+
+
+                </section>
+                <section id="plot_confusion_matrix_epoch">
+                            <input id="plot_confusion_matrix_epoch-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">plot_confusion_matrix_epoch</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">cm</span><span class="p">:</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span>, </span><span class="param"><span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span>, </span><span class="param"><span class="n">save_path</span><span class="o">=</span><span class="kc">None</span></span><span class="return-annotation">) -> <span class="kc">None</span>:</span></span>
+
+                <label class="view-source-button" for="plot_confusion_matrix_epoch-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#plot_confusion_matrix_epoch"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="plot_confusion_matrix_epoch-97"><a href="#plot_confusion_matrix_epoch-97"><span class="linenos"> 97</span></a><span class="k">def</span><span class="w"> </span><span class="nf">plot_confusion_matrix_epoch</span><span class="p">(</span><span class="n">cm</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">save_path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="plot_confusion_matrix_epoch-98"><a href="#plot_confusion_matrix_epoch-98"><span class="linenos"> 98</span></a><span class="w">    </span><span class="sd">"""Plot a single confusion matrix.</span>
+</span><span id="plot_confusion_matrix_epoch-99"><a href="#plot_confusion_matrix_epoch-99"><span class="linenos"> 99</span></a>
+</span><span id="plot_confusion_matrix_epoch-100"><a href="#plot_confusion_matrix_epoch-100"><span class="linenos">100</span></a><span class="sd">    Parameters</span>
+</span><span id="plot_confusion_matrix_epoch-101"><a href="#plot_confusion_matrix_epoch-101"><span class="linenos">101</span></a><span class="sd">    ----------</span>
+</span><span id="plot_confusion_matrix_epoch-102"><a href="#plot_confusion_matrix_epoch-102"><span class="linenos">102</span></a><span class="sd">    cm : np.ndarray</span>
+</span><span id="plot_confusion_matrix_epoch-103"><a href="#plot_confusion_matrix_epoch-103"><span class="linenos">103</span></a><span class="sd">        Confusion matrix of shape ``(n_classes, n_classes)``.</span>
+</span><span id="plot_confusion_matrix_epoch-104"><a href="#plot_confusion_matrix_epoch-104"><span class="linenos">104</span></a><span class="sd">    epoch : int</span>
+</span><span id="plot_confusion_matrix_epoch-105"><a href="#plot_confusion_matrix_epoch-105"><span class="linenos">105</span></a><span class="sd">        Epoch number (used in the plot title).</span>
+</span><span id="plot_confusion_matrix_epoch-106"><a href="#plot_confusion_matrix_epoch-106"><span class="linenos">106</span></a><span class="sd">    save_path : str or pathlib.Path, optional</span>
+</span><span id="plot_confusion_matrix_epoch-107"><a href="#plot_confusion_matrix_epoch-107"><span class="linenos">107</span></a><span class="sd">        If provided, save the figure to this path.</span>
+</span><span id="plot_confusion_matrix_epoch-108"><a href="#plot_confusion_matrix_epoch-108"><span class="linenos">108</span></a><span class="sd">    """</span>
+</span><span id="plot_confusion_matrix_epoch-109"><a href="#plot_confusion_matrix_epoch-109"><span class="linenos">109</span></a>    <span class="n">_</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+</span><span id="plot_confusion_matrix_epoch-110"><a href="#plot_confusion_matrix_epoch-110"><span class="linenos">110</span></a>    <span class="n">disp</span> <span class="o">=</span> <span class="n">ConfusionMatrixDisplay</span><span class="p">(</span><span class="n">confusion_matrix</span><span class="o">=</span><span class="n">cm</span><span class="p">,</span> <span class="n">display_labels</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">))</span>
+</span><span id="plot_confusion_matrix_epoch-111"><a href="#plot_confusion_matrix_epoch-111"><span class="linenos">111</span></a>    <span class="n">disp</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s2">"Blues"</span><span class="p">)</span>
+</span><span id="plot_confusion_matrix_epoch-112"><a href="#plot_confusion_matrix_epoch-112"><span class="linenos">112</span></a>    <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Confusion Matrix - Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span id="plot_confusion_matrix_epoch-113"><a href="#plot_confusion_matrix_epoch-113"><span class="linenos">113</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</span><span id="plot_confusion_matrix_epoch-114"><a href="#plot_confusion_matrix_epoch-114"><span class="linenos">114</span></a>
+</span><span id="plot_confusion_matrix_epoch-115"><a href="#plot_confusion_matrix_epoch-115"><span class="linenos">115</span></a>    <span class="k">if</span> <span class="n">save_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="plot_confusion_matrix_epoch-116"><a href="#plot_confusion_matrix_epoch-116"><span class="linenos">116</span></a>        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">bbox_inches</span><span class="o">=</span><span class="s2">"tight"</span><span class="p">)</span>
+</span><span id="plot_confusion_matrix_epoch-117"><a href="#plot_confusion_matrix_epoch-117"><span class="linenos">117</span></a>
+</span><span id="plot_confusion_matrix_epoch-118"><a href="#plot_confusion_matrix_epoch-118"><span class="linenos">118</span></a>    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Plot a single confusion matrix.</p>
+
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>cm</strong> (np.ndarray):
+Confusion matrix of shape <code>(n_classes, n_classes)</code>.</li>
+<li><strong>epoch</strong> (int):
+Epoch number (used in the plot title).</li>
+<li><strong>save_path</strong> (str or pathlib.Path, optional):
+If provided, save the figure to this path.</li>
+</ul>
+</div>
+
+
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

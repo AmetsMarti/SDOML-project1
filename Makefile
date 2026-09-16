@@ -39,6 +39,11 @@ format:
 	ruff format
 
 
+## Generate HTML documentation with pdoc
+.PHONY: docs
+docs:
+	uv run pdoc sdoml_task1 -o docs --docformat numpy
+	@echo "Documentation generated in docs/"
 
 
 

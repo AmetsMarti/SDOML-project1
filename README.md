@@ -11,6 +11,61 @@ This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilk
 ### Running the code
 In order to run the jupyter notebook, you can use `uv sync` to create an environment and synchronize the dependencies. Depending on your code editor, you might need to manually select the created environment as a Python kernel. For a more detailed description of all the project's requirements, please check `pyproject.toml`. The notebooks are divided into two: The 00 notebook downloads and visualizes the data. The 01 notebooks performs the feature extracion and model training.
 
+### Dependency Management with uv
+This project uses [uv](https://docs.astral.sh/uv/) for dependency management and virtual environment handling.
+
+**Setup on a fresh system:**
+```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Create virtual environment and install dependencies
+uv sync
+```
+
+**Adding new dependencies:**
+```bash
+# Add a new dependency
+uv add <package-name>
+
+# Add a development dependency
+uv add --dev <package-name>
+```
+
+**Key features:**
+- `uv.lock` ensures reproducible builds across systems
+- Dependencies are pinned in `pyproject.toml` with minimum version constraints
+- Run `uv sync` to install all dependencies in a virtual environment
+
+### Documentation
+
+#### Code Documentation
+All modules, classes, and functions are documented using NumPy-style docstrings. The documentation includes:
+- Module-level docstrings describing the purpose and contents
+- Class docstrings with Parameters sections
+- Function docstrings with Parameters, Returns, and Examples sections
+- Type annotations in docstrings for clarity
+
+#### Generating HTML Documentation
+To generate the HTML documentation using pdoc:
+
+```bash
+# Using Make
+make docs
+
+# Or directly with pdoc
+pdoc sdoml_task1 -o docs --docformat numpy
+```
+
+The generated documentation will be available in the `docs/` directory. Open `docs/index.html` in a browser to view the documentation.
+
+#### Viewing Documentation
+The HTML documentation is structured similarly to NumPy/Scikit-learn/PyTorch documentation:
+- Module index for overview
+- Class and function documentation with parameters and return values
+- Cross-references between related functions
+- Searchable content
+
 ### Project Organization
 The project is organized by making use of the [cookie cutter template](https://cookiecutter-data-science.drivendata.org/)
 <a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">

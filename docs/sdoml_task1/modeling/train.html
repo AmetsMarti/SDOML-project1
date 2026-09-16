@@ -28,6 +28,13 @@
 
 
 
+            <h2>API Documentation</h2>
+                <ul class="memberlist">
+            <li>
+                    <a class="function" href="#train">train</a>
+            </li>
+    </ul>
+
 
 
         <a class="attribution" title="pdoc: Python API documentation generator" href="https://pdoc.dev" target="_blank">
@@ -42,18 +49,316 @@
                     <h1 class="modulename">
 <a href="./../../sdoml_task1.html">sdoml_task1</a><wbr>.<a href="./../modeling.html">modeling</a><wbr>.train    </h1>
 
-                        <div class="docstring"><p>Code to train models.</p>
+                        <div class="docstring"><p>Training loop for classification models.</p>
+
+<p>This module implements the training loop for the digit classification model,
+including validation evaluation and confusion matrix computation at each epoch.</p>
+
+<h6 id="functions">Functions</h6>
+
+<p>train(model, train_loader, val_loader, epochs, lr, device)
+    Train a classifier and return per-epoch metrics.</p>
 </div>
 
                         <input id="mod-train-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 
                         <label class="view-source-button" for="mod-train-view-source"><span>View Source</span></label>
 
-                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">1</span></a><span class="sd">"""Code to train models."""</span>
+                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">  1</span></a><span class="sd">"""Training loop for classification models.</span>
+</span><span id="L-2"><a href="#L-2"><span class="linenos">  2</span></a>
+</span><span id="L-3"><a href="#L-3"><span class="linenos">  3</span></a><span class="sd">This module implements the training loop for the digit classification model,</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos">  4</span></a><span class="sd">including validation evaluation and confusion matrix computation at each epoch.</span>
+</span><span id="L-5"><a href="#L-5"><span class="linenos">  5</span></a>
+</span><span id="L-6"><a href="#L-6"><span class="linenos">  6</span></a><span class="sd">Functions</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos">  7</span></a><span class="sd">---------</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos">  8</span></a><span class="sd">train(model, train_loader, val_loader, epochs, lr, device)</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos">  9</span></a><span class="sd">    Train a classifier and return per-epoch metrics.</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos"> 10</span></a><span class="sd">"""</span>
+</span><span id="L-11"><a href="#L-11"><span class="linenos"> 11</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">sklearn.metrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">confusion_matrix</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">nn</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a>
+</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a>
+</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a>    <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a>    <span class="n">train_loader</span><span class="p">,</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a>    <span class="n">val_loader</span><span class="p">,</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a>    <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a>    <span class="n">lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a>    <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a><span class="w">    </span><span class="sd">"""Train a classifier and return metrics per epoch.</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos"> 25</span></a>
+</span><span id="L-26"><a href="#L-26"><span class="linenos"> 26</span></a><span class="sd">    Uses Adam optimizer and cross-entropy loss. Tracks training and</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos"> 27</span></a><span class="sd">    validation loss, accuracy, and confusion matrices at each epoch.</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos"> 28</span></a>
+</span><span id="L-29"><a href="#L-29"><span class="linenos"> 29</span></a><span class="sd">    Parameters</span>
+</span><span id="L-30"><a href="#L-30"><span class="linenos"> 30</span></a><span class="sd">    ----------</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos"> 31</span></a><span class="sd">    model : torch.nn.Module</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a><span class="sd">        Model to train.</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a><span class="sd">    train_loader : torch.utils.data.DataLoader</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a><span class="sd">        Training data loader.</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">    val_loader : torch.utils.data.DataLoader</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">        Validation data loader.</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="sd">    epochs : int, default=40</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="sd">        Number of training epochs.</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="sd">    lr : float, default=1e-4</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="sd">        Learning rate for Adam optimizer.</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">    device : str or torch.device, optional</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="sd">        Device to use for training. If ``None``, auto-detects CUDA or CPU.</span>
+</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">    Returns</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="sd">    -------</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">    dict</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="sd">        Dictionary containing:</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a><span class="sd">        - ``"loss_train"`` : list of float -- Training loss per epoch.</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="sd">        - ``"accuracy_train"`` : list of float -- Training accuracy per epoch.</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a><span class="sd">        - ``"loss_val"`` : list of float -- Validation loss per epoch.</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a><span class="sd">        - ``"accuracy_val"`` : list of float -- Validation accuracy per epoch.</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a><span class="sd">        - ``"confusion_matrices"`` : list of np.ndarray -- Confusion matrices per epoch.</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a><span class="sd">        - ``"model"`` : torch.nn.Module -- The trained model.</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a><span class="sd">    """</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>    <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">"cuda"</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"cpu"</span><span class="p">)</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>    <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>    <span class="n">loss_train</span><span class="p">,</span> <span class="n">accuracy_train</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>    <span class="n">loss_val</span><span class="p">,</span> <span class="n">accuracy_val</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>    <span class="n">confusion_matrices</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>        <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>        <span class="n">epoch_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>        <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>        <span class="n">all_preds</span><span class="p">,</span> <span class="n">all_labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>        <span class="k">for</span> <span class="n">xb</span><span class="p">,</span> <span class="n">yb</span> <span class="ow">in</span> <span class="n">train_loader</span><span class="p">:</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>            <span class="n">xb</span><span class="p">,</span> <span class="n">yb</span> <span class="o">=</span> <span class="n">xb</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">yb</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>            <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">xb</span><span class="p">)</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>            <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">yb</span><span class="p">)</span>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>            <span class="n">epoch_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">*</span> <span class="n">xb</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>            <span class="n">preds</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>            <span class="n">correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">preds</span> <span class="o">==</span> <span class="n">yb</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>            <span class="n">total</span> <span class="o">+=</span> <span class="n">yb</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>            <span class="n">all_preds</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>            <span class="n">all_labels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">yb</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>        <span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">all_labels</span><span class="p">,</span> <span class="n">all_preds</span><span class="p">)</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>        <span class="n">confusion_matrices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cm</span><span class="p">)</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>        <span class="n">loss_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">epoch_loss</span> <span class="o">/</span> <span class="n">total</span><span class="p">)</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>        <span class="n">accuracy_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">correct</span> <span class="o">/</span> <span class="n">total</span><span class="p">)</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>        <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a>        <span class="n">epoch_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>        <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a>        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a>            <span class="k">for</span> <span class="n">xb</span><span class="p">,</span> <span class="n">yb</span> <span class="ow">in</span> <span class="n">val_loader</span><span class="p">:</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>                <span class="n">xb</span><span class="p">,</span> <span class="n">yb</span> <span class="o">=</span> <span class="n">xb</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">yb</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a>                <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">xb</span><span class="p">)</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a>                <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">yb</span><span class="p">)</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a>                <span class="n">epoch_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">*</span> <span class="n">xb</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a>                <span class="n">preds</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>                <span class="n">correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">preds</span> <span class="o">==</span> <span class="n">yb</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>                <span class="n">total</span> <span class="o">+=</span> <span class="n">yb</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>        <span class="n">loss_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">epoch_loss</span> <span class="o">/</span> <span class="n">total</span><span class="p">)</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>        <span class="n">accuracy_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">correct</span> <span class="o">/</span> <span class="n">total</span><span class="p">)</span>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>        <span class="nb">print</span><span class="p">(</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>            <span class="sa">f</span><span class="s2">"Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">epochs</span><span class="si">}</span><span class="s2"> | "</span>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>            <span class="sa">f</span><span class="s2">"Train Loss: </span><span class="si">{</span><span class="n">loss_train</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> | Train Acc: </span><span class="si">{</span><span class="n">accuracy_train</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> | "</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>            <span class="sa">f</span><span class="s2">"Val Loss: </span><span class="si">{</span><span class="n">loss_val</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> | Val Acc: </span><span class="si">{</span><span class="n">accuracy_val</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>        <span class="p">)</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a>
+</span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>    <span class="k">return</span> <span class="p">{</span>
+</span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a>        <span class="s2">"loss_train"</span><span class="p">:</span> <span class="n">loss_train</span><span class="p">,</span>
+</span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a>        <span class="s2">"accuracy_train"</span><span class="p">:</span> <span class="n">accuracy_train</span><span class="p">,</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a>        <span class="s2">"loss_val"</span><span class="p">:</span> <span class="n">loss_val</span><span class="p">,</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a>        <span class="s2">"accuracy_val"</span><span class="p">:</span> <span class="n">accuracy_val</span><span class="p">,</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>        <span class="s2">"confusion_matrices"</span><span class="p">:</span> <span class="n">confusion_matrices</span><span class="p">,</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>        <span class="s2">"model"</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a>    <span class="p">}</span>
 </span></pre></div>
 
 
             </section>
+                <section id="train">
+                            <input id="train-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
+<div class="attr function">
+            
+        <span class="def">def</span>
+        <span class="name">train</span><span class="signature pdoc-code multiline">(<span class="param">	<span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">Module</span>,</span><span class="param">	<span class="n">train_loader</span>,</span><span class="param">	<span class="n">val_loader</span>,</span><span class="param">	<span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span>,</span><span class="param">	<span class="n">lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0001</span>,</span><span class="param">	<span class="n">device</span><span class="o">=</span><span class="kc">None</span></span><span class="return-annotation">) -> <span class="nb">dict</span>:</span></span>
+
+                <label class="view-source-button" for="train-view-source"><span>View Source</span></label>
+
+    </div>
+    <a class="headerlink" href="#train"></a>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="train-17"><a href="#train-17"><span class="linenos"> 17</span></a><span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span>
+</span><span id="train-18"><a href="#train-18"><span class="linenos"> 18</span></a>    <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+</span><span id="train-19"><a href="#train-19"><span class="linenos"> 19</span></a>    <span class="n">train_loader</span><span class="p">,</span>
+</span><span id="train-20"><a href="#train-20"><span class="linenos"> 20</span></a>    <span class="n">val_loader</span><span class="p">,</span>
+</span><span id="train-21"><a href="#train-21"><span class="linenos"> 21</span></a>    <span class="n">epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">40</span><span class="p">,</span>
+</span><span id="train-22"><a href="#train-22"><span class="linenos"> 22</span></a>    <span class="n">lr</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-4</span><span class="p">,</span>
+</span><span id="train-23"><a href="#train-23"><span class="linenos"> 23</span></a>    <span class="n">device</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+</span><span id="train-24"><a href="#train-24"><span class="linenos"> 24</span></a><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span id="train-25"><a href="#train-25"><span class="linenos"> 25</span></a><span class="w">    </span><span class="sd">"""Train a classifier and return metrics per epoch.</span>
+</span><span id="train-26"><a href="#train-26"><span class="linenos"> 26</span></a>
+</span><span id="train-27"><a href="#train-27"><span class="linenos"> 27</span></a><span class="sd">    Uses Adam optimizer and cross-entropy loss. Tracks training and</span>
+</span><span id="train-28"><a href="#train-28"><span class="linenos"> 28</span></a><span class="sd">    validation loss, accuracy, and confusion matrices at each epoch.</span>
+</span><span id="train-29"><a href="#train-29"><span class="linenos"> 29</span></a>
+</span><span id="train-30"><a href="#train-30"><span class="linenos"> 30</span></a><span class="sd">    Parameters</span>
+</span><span id="train-31"><a href="#train-31"><span class="linenos"> 31</span></a><span class="sd">    ----------</span>
+</span><span id="train-32"><a href="#train-32"><span class="linenos"> 32</span></a><span class="sd">    model : torch.nn.Module</span>
+</span><span id="train-33"><a href="#train-33"><span class="linenos"> 33</span></a><span class="sd">        Model to train.</span>
+</span><span id="train-34"><a href="#train-34"><span class="linenos"> 34</span></a><span class="sd">    train_loader : torch.utils.data.DataLoader</span>
+</span><span id="train-35"><a href="#train-35"><span class="linenos"> 35</span></a><span class="sd">        Training data loader.</span>
+</span><span id="train-36"><a href="#train-36"><span class="linenos"> 36</span></a><span class="sd">    val_loader : torch.utils.data.DataLoader</span>
+</span><span id="train-37"><a href="#train-37"><span class="linenos"> 37</span></a><span class="sd">        Validation data loader.</span>
+</span><span id="train-38"><a href="#train-38"><span class="linenos"> 38</span></a><span class="sd">    epochs : int, default=40</span>
+</span><span id="train-39"><a href="#train-39"><span class="linenos"> 39</span></a><span class="sd">        Number of training epochs.</span>
+</span><span id="train-40"><a href="#train-40"><span class="linenos"> 40</span></a><span class="sd">    lr : float, default=1e-4</span>
+</span><span id="train-41"><a href="#train-41"><span class="linenos"> 41</span></a><span class="sd">        Learning rate for Adam optimizer.</span>
+</span><span id="train-42"><a href="#train-42"><span class="linenos"> 42</span></a><span class="sd">    device : str or torch.device, optional</span>
+</span><span id="train-43"><a href="#train-43"><span class="linenos"> 43</span></a><span class="sd">        Device to use for training. If ``None``, auto-detects CUDA or CPU.</span>
+</span><span id="train-44"><a href="#train-44"><span class="linenos"> 44</span></a>
+</span><span id="train-45"><a href="#train-45"><span class="linenos"> 45</span></a><span class="sd">    Returns</span>
+</span><span id="train-46"><a href="#train-46"><span class="linenos"> 46</span></a><span class="sd">    -------</span>
+</span><span id="train-47"><a href="#train-47"><span class="linenos"> 47</span></a><span class="sd">    dict</span>
+</span><span id="train-48"><a href="#train-48"><span class="linenos"> 48</span></a><span class="sd">        Dictionary containing:</span>
+</span><span id="train-49"><a href="#train-49"><span class="linenos"> 49</span></a>
+</span><span id="train-50"><a href="#train-50"><span class="linenos"> 50</span></a><span class="sd">        - ``"loss_train"`` : list of float -- Training loss per epoch.</span>
+</span><span id="train-51"><a href="#train-51"><span class="linenos"> 51</span></a><span class="sd">        - ``"accuracy_train"`` : list of float -- Training accuracy per epoch.</span>
+</span><span id="train-52"><a href="#train-52"><span class="linenos"> 52</span></a><span class="sd">        - ``"loss_val"`` : list of float -- Validation loss per epoch.</span>
+</span><span id="train-53"><a href="#train-53"><span class="linenos"> 53</span></a><span class="sd">        - ``"accuracy_val"`` : list of float -- Validation accuracy per epoch.</span>
+</span><span id="train-54"><a href="#train-54"><span class="linenos"> 54</span></a><span class="sd">        - ``"confusion_matrices"`` : list of np.ndarray -- Confusion matrices per epoch.</span>
+</span><span id="train-55"><a href="#train-55"><span class="linenos"> 55</span></a><span class="sd">        - ``"model"`` : torch.nn.Module -- The trained model.</span>
+</span><span id="train-56"><a href="#train-56"><span class="linenos"> 56</span></a><span class="sd">    """</span>
+</span><span id="train-57"><a href="#train-57"><span class="linenos"> 57</span></a>    <span class="k">if</span> <span class="n">device</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="train-58"><a href="#train-58"><span class="linenos"> 58</span></a>        <span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="s2">"cuda"</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"cpu"</span><span class="p">)</span>
+</span><span id="train-59"><a href="#train-59"><span class="linenos"> 59</span></a>
+</span><span id="train-60"><a href="#train-60"><span class="linenos"> 60</span></a>    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="train-61"><a href="#train-61"><span class="linenos"> 61</span></a>    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">lr</span><span class="p">)</span>
+</span><span id="train-62"><a href="#train-62"><span class="linenos"> 62</span></a>    <span class="n">loss_fn</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">CrossEntropyLoss</span><span class="p">()</span>
+</span><span id="train-63"><a href="#train-63"><span class="linenos"> 63</span></a>
+</span><span id="train-64"><a href="#train-64"><span class="linenos"> 64</span></a>    <span class="n">loss_train</span><span class="p">,</span> <span class="n">accuracy_train</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+</span><span id="train-65"><a href="#train-65"><span class="linenos"> 65</span></a>    <span class="n">loss_val</span><span class="p">,</span> <span class="n">accuracy_val</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+</span><span id="train-66"><a href="#train-66"><span class="linenos"> 66</span></a>    <span class="n">confusion_matrices</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span id="train-67"><a href="#train-67"><span class="linenos"> 67</span></a>
+</span><span id="train-68"><a href="#train-68"><span class="linenos"> 68</span></a>    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+</span><span id="train-69"><a href="#train-69"><span class="linenos"> 69</span></a>        <span class="n">model</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+</span><span id="train-70"><a href="#train-70"><span class="linenos"> 70</span></a>        <span class="n">epoch_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+</span><span id="train-71"><a href="#train-71"><span class="linenos"> 71</span></a>        <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="train-72"><a href="#train-72"><span class="linenos"> 72</span></a>        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="train-73"><a href="#train-73"><span class="linenos"> 73</span></a>        <span class="n">all_preds</span><span class="p">,</span> <span class="n">all_labels</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+</span><span id="train-74"><a href="#train-74"><span class="linenos"> 74</span></a>
+</span><span id="train-75"><a href="#train-75"><span class="linenos"> 75</span></a>        <span class="k">for</span> <span class="n">xb</span><span class="p">,</span> <span class="n">yb</span> <span class="ow">in</span> <span class="n">train_loader</span><span class="p">:</span>
+</span><span id="train-76"><a href="#train-76"><span class="linenos"> 76</span></a>            <span class="n">xb</span><span class="p">,</span> <span class="n">yb</span> <span class="o">=</span> <span class="n">xb</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">yb</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="train-77"><a href="#train-77"><span class="linenos"> 77</span></a>            <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+</span><span id="train-78"><a href="#train-78"><span class="linenos"> 78</span></a>            <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">xb</span><span class="p">)</span>
+</span><span id="train-79"><a href="#train-79"><span class="linenos"> 79</span></a>            <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">yb</span><span class="p">)</span>
+</span><span id="train-80"><a href="#train-80"><span class="linenos"> 80</span></a>            <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+</span><span id="train-81"><a href="#train-81"><span class="linenos"> 81</span></a>            <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+</span><span id="train-82"><a href="#train-82"><span class="linenos"> 82</span></a>
+</span><span id="train-83"><a href="#train-83"><span class="linenos"> 83</span></a>            <span class="n">epoch_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">*</span> <span class="n">xb</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="train-84"><a href="#train-84"><span class="linenos"> 84</span></a>            <span class="n">preds</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="train-85"><a href="#train-85"><span class="linenos"> 85</span></a>            <span class="n">correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">preds</span> <span class="o">==</span> <span class="n">yb</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+</span><span id="train-86"><a href="#train-86"><span class="linenos"> 86</span></a>            <span class="n">total</span> <span class="o">+=</span> <span class="n">yb</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="train-87"><a href="#train-87"><span class="linenos"> 87</span></a>            <span class="n">all_preds</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">preds</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+</span><span id="train-88"><a href="#train-88"><span class="linenos"> 88</span></a>            <span class="n">all_labels</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">yb</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+</span><span id="train-89"><a href="#train-89"><span class="linenos"> 89</span></a>
+</span><span id="train-90"><a href="#train-90"><span class="linenos"> 90</span></a>        <span class="n">cm</span> <span class="o">=</span> <span class="n">confusion_matrix</span><span class="p">(</span><span class="n">all_labels</span><span class="p">,</span> <span class="n">all_preds</span><span class="p">)</span>
+</span><span id="train-91"><a href="#train-91"><span class="linenos"> 91</span></a>        <span class="n">confusion_matrices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cm</span><span class="p">)</span>
+</span><span id="train-92"><a href="#train-92"><span class="linenos"> 92</span></a>
+</span><span id="train-93"><a href="#train-93"><span class="linenos"> 93</span></a>        <span class="n">loss_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">epoch_loss</span> <span class="o">/</span> <span class="n">total</span><span class="p">)</span>
+</span><span id="train-94"><a href="#train-94"><span class="linenos"> 94</span></a>        <span class="n">accuracy_train</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">correct</span> <span class="o">/</span> <span class="n">total</span><span class="p">)</span>
+</span><span id="train-95"><a href="#train-95"><span class="linenos"> 95</span></a>
+</span><span id="train-96"><a href="#train-96"><span class="linenos"> 96</span></a>        <span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="train-97"><a href="#train-97"><span class="linenos"> 97</span></a>        <span class="n">epoch_loss</span> <span class="o">=</span> <span class="mf">0.0</span>
+</span><span id="train-98"><a href="#train-98"><span class="linenos"> 98</span></a>        <span class="n">correct</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="train-99"><a href="#train-99"><span class="linenos"> 99</span></a>        <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span id="train-100"><a href="#train-100"><span class="linenos">100</span></a>
+</span><span id="train-101"><a href="#train-101"><span class="linenos">101</span></a>        <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+</span><span id="train-102"><a href="#train-102"><span class="linenos">102</span></a>            <span class="k">for</span> <span class="n">xb</span><span class="p">,</span> <span class="n">yb</span> <span class="ow">in</span> <span class="n">val_loader</span><span class="p">:</span>
+</span><span id="train-103"><a href="#train-103"><span class="linenos">103</span></a>                <span class="n">xb</span><span class="p">,</span> <span class="n">yb</span> <span class="o">=</span> <span class="n">xb</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">),</span> <span class="n">yb</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="train-104"><a href="#train-104"><span class="linenos">104</span></a>                <span class="n">out</span> <span class="o">=</span> <span class="n">model</span><span class="p">(</span><span class="n">xb</span><span class="p">)</span>
+</span><span id="train-105"><a href="#train-105"><span class="linenos">105</span></a>                <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_fn</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">yb</span><span class="p">)</span>
+</span><span id="train-106"><a href="#train-106"><span class="linenos">106</span></a>                <span class="n">epoch_loss</span> <span class="o">+=</span> <span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">*</span> <span class="n">xb</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="train-107"><a href="#train-107"><span class="linenos">107</span></a>                <span class="n">preds</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span id="train-108"><a href="#train-108"><span class="linenos">108</span></a>                <span class="n">correct</span> <span class="o">+=</span> <span class="p">(</span><span class="n">preds</span> <span class="o">==</span> <span class="n">yb</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+</span><span id="train-109"><a href="#train-109"><span class="linenos">109</span></a>                <span class="n">total</span> <span class="o">+=</span> <span class="n">yb</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="train-110"><a href="#train-110"><span class="linenos">110</span></a>
+</span><span id="train-111"><a href="#train-111"><span class="linenos">111</span></a>        <span class="n">loss_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">epoch_loss</span> <span class="o">/</span> <span class="n">total</span><span class="p">)</span>
+</span><span id="train-112"><a href="#train-112"><span class="linenos">112</span></a>        <span class="n">accuracy_val</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">correct</span> <span class="o">/</span> <span class="n">total</span><span class="p">)</span>
+</span><span id="train-113"><a href="#train-113"><span class="linenos">113</span></a>
+</span><span id="train-114"><a href="#train-114"><span class="linenos">114</span></a>        <span class="nb">print</span><span class="p">(</span>
+</span><span id="train-115"><a href="#train-115"><span class="linenos">115</span></a>            <span class="sa">f</span><span class="s2">"Epoch </span><span class="si">{</span><span class="n">epoch</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">epochs</span><span class="si">}</span><span class="s2"> | "</span>
+</span><span id="train-116"><a href="#train-116"><span class="linenos">116</span></a>            <span class="sa">f</span><span class="s2">"Train Loss: </span><span class="si">{</span><span class="n">loss_train</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> | Train Acc: </span><span class="si">{</span><span class="n">accuracy_train</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> | "</span>
+</span><span id="train-117"><a href="#train-117"><span class="linenos">117</span></a>            <span class="sa">f</span><span class="s2">"Val Loss: </span><span class="si">{</span><span class="n">loss_val</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2"> | Val Acc: </span><span class="si">{</span><span class="n">accuracy_val</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">"</span>
+</span><span id="train-118"><a href="#train-118"><span class="linenos">118</span></a>        <span class="p">)</span>
+</span><span id="train-119"><a href="#train-119"><span class="linenos">119</span></a>
+</span><span id="train-120"><a href="#train-120"><span class="linenos">120</span></a>    <span class="k">return</span> <span class="p">{</span>
+</span><span id="train-121"><a href="#train-121"><span class="linenos">121</span></a>        <span class="s2">"loss_train"</span><span class="p">:</span> <span class="n">loss_train</span><span class="p">,</span>
+</span><span id="train-122"><a href="#train-122"><span class="linenos">122</span></a>        <span class="s2">"accuracy_train"</span><span class="p">:</span> <span class="n">accuracy_train</span><span class="p">,</span>
+</span><span id="train-123"><a href="#train-123"><span class="linenos">123</span></a>        <span class="s2">"loss_val"</span><span class="p">:</span> <span class="n">loss_val</span><span class="p">,</span>
+</span><span id="train-124"><a href="#train-124"><span class="linenos">124</span></a>        <span class="s2">"accuracy_val"</span><span class="p">:</span> <span class="n">accuracy_val</span><span class="p">,</span>
+</span><span id="train-125"><a href="#train-125"><span class="linenos">125</span></a>        <span class="s2">"confusion_matrices"</span><span class="p">:</span> <span class="n">confusion_matrices</span><span class="p">,</span>
+</span><span id="train-126"><a href="#train-126"><span class="linenos">126</span></a>        <span class="s2">"model"</span><span class="p">:</span> <span class="n">model</span><span class="p">,</span>
+</span><span id="train-127"><a href="#train-127"><span class="linenos">127</span></a>    <span class="p">}</span>
+</span></pre></div>
+
+
+            <div class="docstring"><p>Train a classifier and return metrics per epoch.</p>
+
+<p>Uses Adam optimizer and cross-entropy loss. Tracks training and
+validation loss, accuracy, and confusion matrices at each epoch.</p>
+
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>model</strong> (torch.nn.Module):
+Model to train.</li>
+<li><strong>train_loader</strong> (torch.utils.data.DataLoader):
+Training data loader.</li>
+<li><strong>val_loader</strong> (torch.utils.data.DataLoader):
+Validation data loader.</li>
+<li><strong>epochs</strong> (int, default=40):
+Number of training epochs.</li>
+<li><strong>lr</strong> (float, default=1e-4):
+Learning rate for Adam optimizer.</li>
+<li><strong>device</strong> (str or torch.device, optional):
+Device to use for training. If <code>None</code>, auto-detects CUDA or CPU.</li>
+</ul>
+
+<h6 id="returns">Returns</h6>
+
+<ul>
+<li><p><strong>dict</strong>: Dictionary containing:</p>
+
+<ul>
+<li><code>"loss_train"</code> : list of float -- Training loss per epoch.</li>
+<li><code>"accuracy_train"</code> : list of float -- Training accuracy per epoch.</li>
+<li><code>"loss_val"</code> : list of float -- Validation loss per epoch.</li>
+<li><code>"accuracy_val"</code> : list of float -- Validation accuracy per epoch.</li>
+<li><code>"confusion_matrices"</code> : list of np.ndarray -- Confusion matrices per epoch.</li>
+<li><code>"model"</code> : torch.nn.Module -- The trained model.</li>
+</ul></li>
+</ul>
+</div>
+
+
+                </section>
     </main>
 <script>
     function escapeHTML(html) {

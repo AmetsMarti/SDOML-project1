@@ -65,48 +65,69 @@
 <a href="./../../sdoml_task1.html">sdoml_task1</a><wbr>.<a href="./../modeling.html">modeling</a><wbr>.model    </h1>
 
                         <div class="docstring"><p>Neural network model for digit classification.</p>
+
+<p>This module defines the feedforward neural network architecture used
+for classifying spoken digits (0-9) from MFCC audio features.</p>
+
+<h6 id="classes">Classes</h6>
+
+<p>Net
+    A simple feedforward network with ReLU activations.</p>
 </div>
 
                         <input id="mod-model-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 
                         <label class="view-source-button" for="mod-model-view-source"><span>View Source</span></label>
 
-                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="sd">"""Neural network model for digit classification."""</span>
+                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="sd">"""Neural network model for digit classification.</span>
 </span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a>
-</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="sd">This module defines the feedforward neural network architecture used</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="sd">for classifying spoken digits (0-9) from MFCC audio features.</span>
 </span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a>
-</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="k">class</span><span class="w"> </span><span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="w">    </span><span class="sd">"""Simple feedforward network for digit classification.</span>
-</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a>
-</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    Parameters</span>
-</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="sd">    ----------</span>
-</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="sd">    input_dim : int, default=26</span>
-</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="sd">        Size of the input feature vector.</span>
-</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="sd">    num_classes : int, default=10</span>
-</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a><span class="sd">        Number of output classes.</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a><span class="sd">    """</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="o">=</span><span class="mi">26</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a>        <span class="c1"># self.fc2 = nn.Linear(64, 32)</span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
-</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a><span class="w">        </span><span class="sd">"""Run a forward pass.</span>
-</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a><span class="sd">        </span>
-</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a><span class="sd">        Parameters</span>
-</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="sd">        ----------</span>
-</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a><span class="sd">        x : torch.Tensor</span>
-</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">            Input tensor, shape (batch_size, input_dim).</span>
-</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">        </span>
-</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a><span class="sd">        Returns</span>
-</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a><span class="sd">        -------</span>
-</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a><span class="sd">        torch.Tensor</span>
-</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a><span class="sd">            Output logits, shape (batch_size, num_classes).</span>
-</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a><span class="sd">        """</span>
-</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>        <span class="c1"># x = torch.relu(self.fc2(x))</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a><span class="sd">Classes</span>
+</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="sd">-------</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="sd">Net</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a><span class="sd">    A simple feedforward network with ReLU activations.</span>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a>
+</span><span id="L-11"><a href="#L-11"><span class="linenos">11</span></a><span class="sd">"""</span>
+</span><span id="L-12"><a href="#L-12"><span class="linenos">12</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+</span><span id="L-13"><a href="#L-13"><span class="linenos">13</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">nn</span>
+</span><span id="L-14"><a href="#L-14"><span class="linenos">14</span></a>
+</span><span id="L-15"><a href="#L-15"><span class="linenos">15</span></a>
+</span><span id="L-16"><a href="#L-16"><span class="linenos">16</span></a><span class="k">class</span><span class="w"> </span><span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos">17</span></a><span class="w">    </span><span class="sd">"""Simple feedforward network for digit classification.</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos">18</span></a>
+</span><span id="L-19"><a href="#L-19"><span class="linenos">19</span></a><span class="sd">    Architecture: Input(26) -&gt; Linear(64) -&gt; ReLU -&gt; Linear(10).</span>
+</span><span id="L-20"><a href="#L-20"><span class="linenos">20</span></a>
+</span><span id="L-21"><a href="#L-21"><span class="linenos">21</span></a><span class="sd">    Parameters</span>
+</span><span id="L-22"><a href="#L-22"><span class="linenos">22</span></a><span class="sd">    ----------</span>
+</span><span id="L-23"><a href="#L-23"><span class="linenos">23</span></a><span class="sd">    input_dim : int, default=26</span>
+</span><span id="L-24"><a href="#L-24"><span class="linenos">24</span></a><span class="sd">        Size of the input feature vector. Matches the dimensionality</span>
+</span><span id="L-25"><a href="#L-25"><span class="linenos">25</span></a><span class="sd">        of MFCC mean+std features (13 coefficients * 2).</span>
+</span><span id="L-26"><a href="#L-26"><span class="linenos">26</span></a><span class="sd">    num_classes : int, default=10</span>
+</span><span id="L-27"><a href="#L-27"><span class="linenos">27</span></a><span class="sd">        Number of output classes (digits 0-9).</span>
+</span><span id="L-28"><a href="#L-28"><span class="linenos">28</span></a><span class="sd">    """</span>
+</span><span id="L-29"><a href="#L-29"><span class="linenos">29</span></a>
+</span><span id="L-30"><a href="#L-30"><span class="linenos">30</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">26</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-31"><a href="#L-31"><span class="linenos">31</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+</span><span id="L-32"><a href="#L-32"><span class="linenos">32</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+</span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
+</span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a>
+</span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="w">        </span><span class="sd">"""Run a forward pass through the network.</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>
+</span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="sd">        Parameters</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a><span class="sd">        ----------</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a><span class="sd">        x : torch.Tensor</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a><span class="sd">            Input tensor of shape ``(batch_size, input_dim)``.</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a><span class="sd">        Returns</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a><span class="sd">        -------</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a><span class="sd">        torch.Tensor</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a><span class="sd">            Output logits of shape ``(batch_size, num_classes)``.</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a><span class="sd">        """</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -122,48 +143,56 @@
 
     </div>
     <a class="headerlink" href="#Net"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="Net-7"><a href="#Net-7"><span class="linenos"> 7</span></a><span class="k">class</span><span class="w"> </span><span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
-</span><span id="Net-8"><a href="#Net-8"><span class="linenos"> 8</span></a><span class="w">    </span><span class="sd">"""Simple feedforward network for digit classification.</span>
-</span><span id="Net-9"><a href="#Net-9"><span class="linenos"> 9</span></a>
-</span><span id="Net-10"><a href="#Net-10"><span class="linenos">10</span></a><span class="sd">    Parameters</span>
-</span><span id="Net-11"><a href="#Net-11"><span class="linenos">11</span></a><span class="sd">    ----------</span>
-</span><span id="Net-12"><a href="#Net-12"><span class="linenos">12</span></a><span class="sd">    input_dim : int, default=26</span>
-</span><span id="Net-13"><a href="#Net-13"><span class="linenos">13</span></a><span class="sd">        Size of the input feature vector.</span>
-</span><span id="Net-14"><a href="#Net-14"><span class="linenos">14</span></a><span class="sd">    num_classes : int, default=10</span>
-</span><span id="Net-15"><a href="#Net-15"><span class="linenos">15</span></a><span class="sd">        Number of output classes.</span>
-</span><span id="Net-16"><a href="#Net-16"><span class="linenos">16</span></a><span class="sd">    """</span>
-</span><span id="Net-17"><a href="#Net-17"><span class="linenos">17</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="o">=</span><span class="mi">26</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-</span><span id="Net-18"><a href="#Net-18"><span class="linenos">18</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-</span><span id="Net-19"><a href="#Net-19"><span class="linenos">19</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
-</span><span id="Net-20"><a href="#Net-20"><span class="linenos">20</span></a>        <span class="c1"># self.fc2 = nn.Linear(64, 32)</span>
-</span><span id="Net-21"><a href="#Net-21"><span class="linenos">21</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
-</span><span id="Net-22"><a href="#Net-22"><span class="linenos">22</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-</span><span id="Net-23"><a href="#Net-23"><span class="linenos">23</span></a><span class="w">        </span><span class="sd">"""Run a forward pass.</span>
-</span><span id="Net-24"><a href="#Net-24"><span class="linenos">24</span></a><span class="sd">        </span>
-</span><span id="Net-25"><a href="#Net-25"><span class="linenos">25</span></a><span class="sd">        Parameters</span>
-</span><span id="Net-26"><a href="#Net-26"><span class="linenos">26</span></a><span class="sd">        ----------</span>
-</span><span id="Net-27"><a href="#Net-27"><span class="linenos">27</span></a><span class="sd">        x : torch.Tensor</span>
-</span><span id="Net-28"><a href="#Net-28"><span class="linenos">28</span></a><span class="sd">            Input tensor, shape (batch_size, input_dim).</span>
-</span><span id="Net-29"><a href="#Net-29"><span class="linenos">29</span></a><span class="sd">        </span>
-</span><span id="Net-30"><a href="#Net-30"><span class="linenos">30</span></a><span class="sd">        Returns</span>
-</span><span id="Net-31"><a href="#Net-31"><span class="linenos">31</span></a><span class="sd">        -------</span>
-</span><span id="Net-32"><a href="#Net-32"><span class="linenos">32</span></a><span class="sd">        torch.Tensor</span>
-</span><span id="Net-33"><a href="#Net-33"><span class="linenos">33</span></a><span class="sd">            Output logits, shape (batch_size, num_classes).</span>
-</span><span id="Net-34"><a href="#Net-34"><span class="linenos">34</span></a><span class="sd">        """</span>
-</span><span id="Net-35"><a href="#Net-35"><span class="linenos">35</span></a>        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-</span><span id="Net-36"><a href="#Net-36"><span class="linenos">36</span></a>        <span class="c1"># x = torch.relu(self.fc2(x))</span>
-</span><span id="Net-37"><a href="#Net-37"><span class="linenos">37</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Net-17"><a href="#Net-17"><span class="linenos">17</span></a><span class="k">class</span><span class="w"> </span><span class="nc">Net</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+</span><span id="Net-18"><a href="#Net-18"><span class="linenos">18</span></a><span class="w">    </span><span class="sd">"""Simple feedforward network for digit classification.</span>
+</span><span id="Net-19"><a href="#Net-19"><span class="linenos">19</span></a>
+</span><span id="Net-20"><a href="#Net-20"><span class="linenos">20</span></a><span class="sd">    Architecture: Input(26) -&gt; Linear(64) -&gt; ReLU -&gt; Linear(10).</span>
+</span><span id="Net-21"><a href="#Net-21"><span class="linenos">21</span></a>
+</span><span id="Net-22"><a href="#Net-22"><span class="linenos">22</span></a><span class="sd">    Parameters</span>
+</span><span id="Net-23"><a href="#Net-23"><span class="linenos">23</span></a><span class="sd">    ----------</span>
+</span><span id="Net-24"><a href="#Net-24"><span class="linenos">24</span></a><span class="sd">    input_dim : int, default=26</span>
+</span><span id="Net-25"><a href="#Net-25"><span class="linenos">25</span></a><span class="sd">        Size of the input feature vector. Matches the dimensionality</span>
+</span><span id="Net-26"><a href="#Net-26"><span class="linenos">26</span></a><span class="sd">        of MFCC mean+std features (13 coefficients * 2).</span>
+</span><span id="Net-27"><a href="#Net-27"><span class="linenos">27</span></a><span class="sd">    num_classes : int, default=10</span>
+</span><span id="Net-28"><a href="#Net-28"><span class="linenos">28</span></a><span class="sd">        Number of output classes (digits 0-9).</span>
+</span><span id="Net-29"><a href="#Net-29"><span class="linenos">29</span></a><span class="sd">    """</span>
+</span><span id="Net-30"><a href="#Net-30"><span class="linenos">30</span></a>
+</span><span id="Net-31"><a href="#Net-31"><span class="linenos">31</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">26</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="Net-32"><a href="#Net-32"><span class="linenos">32</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+</span><span id="Net-33"><a href="#Net-33"><span class="linenos">33</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+</span><span id="Net-34"><a href="#Net-34"><span class="linenos">34</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
+</span><span id="Net-35"><a href="#Net-35"><span class="linenos">35</span></a>
+</span><span id="Net-36"><a href="#Net-36"><span class="linenos">36</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+</span><span id="Net-37"><a href="#Net-37"><span class="linenos">37</span></a><span class="w">        </span><span class="sd">"""Run a forward pass through the network.</span>
+</span><span id="Net-38"><a href="#Net-38"><span class="linenos">38</span></a>
+</span><span id="Net-39"><a href="#Net-39"><span class="linenos">39</span></a><span class="sd">        Parameters</span>
+</span><span id="Net-40"><a href="#Net-40"><span class="linenos">40</span></a><span class="sd">        ----------</span>
+</span><span id="Net-41"><a href="#Net-41"><span class="linenos">41</span></a><span class="sd">        x : torch.Tensor</span>
+</span><span id="Net-42"><a href="#Net-42"><span class="linenos">42</span></a><span class="sd">            Input tensor of shape ``(batch_size, input_dim)``.</span>
+</span><span id="Net-43"><a href="#Net-43"><span class="linenos">43</span></a>
+</span><span id="Net-44"><a href="#Net-44"><span class="linenos">44</span></a><span class="sd">        Returns</span>
+</span><span id="Net-45"><a href="#Net-45"><span class="linenos">45</span></a><span class="sd">        -------</span>
+</span><span id="Net-46"><a href="#Net-46"><span class="linenos">46</span></a><span class="sd">        torch.Tensor</span>
+</span><span id="Net-47"><a href="#Net-47"><span class="linenos">47</span></a><span class="sd">            Output logits of shape ``(batch_size, num_classes)``.</span>
+</span><span id="Net-48"><a href="#Net-48"><span class="linenos">48</span></a><span class="sd">        """</span>
+</span><span id="Net-49"><a href="#Net-49"><span class="linenos">49</span></a>        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</span><span id="Net-50"><a href="#Net-50"><span class="linenos">50</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </span></pre></div>
 
 
             <div class="docstring"><p>Simple feedforward network for digit classification.</p>
 
-<h2 id="parameters">Parameters</h2>
+<p>Architecture: Input(26) -> Linear(64) -> ReLU -> Linear(10).</p>
 
-<p>input_dim : int, default=26
-    Size of the input feature vector.
-num_classes : int, default=10
-    Number of output classes.</p>
+<h6 id="parameters">Parameters</h6>
+
+<ul>
+<li><strong>input_dim</strong> (int, default=26):
+Size of the input feature vector. Matches the dimensionality
+of MFCC mean+std features (13 coefficients * 2).</li>
+<li><strong>num_classes</strong> (int, default=10):
+Number of output classes (digits 0-9).</li>
+</ul>
 </div>
 
 
@@ -171,17 +200,16 @@ num_classes : int, default=10
                                         <input id="Net.__init__-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 <div class="attr function">
             
-        <span class="name">Net</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">input_dim</span><span class="o">=</span><span class="mi">26</span>, </span><span class="param"><span class="n">num_classes</span><span class="o">=</span><span class="mi">10</span></span>)</span>
+        <span class="name">Net</span><span class="signature pdoc-code condensed">(<span class="param"><span class="n">input_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">26</span>, </span><span class="param"><span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span></span>)</span>
 
                 <label class="view-source-button" for="Net.__init__-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#Net.__init__"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="Net.__init__-17"><a href="#Net.__init__-17"><span class="linenos">17</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="o">=</span><span class="mi">26</span><span class="p">,</span> <span class="n">num_classes</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
-</span><span id="Net.__init__-18"><a href="#Net.__init__-18"><span class="linenos">18</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-</span><span id="Net.__init__-19"><a href="#Net.__init__-19"><span class="linenos">19</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
-</span><span id="Net.__init__-20"><a href="#Net.__init__-20"><span class="linenos">20</span></a>        <span class="c1"># self.fc2 = nn.Linear(64, 32)</span>
-</span><span id="Net.__init__-21"><a href="#Net.__init__-21"><span class="linenos">21</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Net.__init__-31"><a href="#Net.__init__-31"><span class="linenos">31</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">26</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="Net.__init__-32"><a href="#Net.__init__-32"><span class="linenos">32</span></a>        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+</span><span id="Net.__init__-33"><a href="#Net.__init__-33"><span class="linenos">33</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc1</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>
+</span><span id="Net.__init__-34"><a href="#Net.__init__-34"><span class="linenos">34</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="mi">64</span><span class="p">,</span> <span class="n">num_classes</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -217,42 +245,44 @@ num_classes : int, default=10
 <div class="attr function">
             
         <span class="def">def</span>
-        <span class="name">forward</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">x</span></span><span class="return-annotation">):</span></span>
+        <span class="name">forward</span><span class="signature pdoc-code condensed">(<span class="param"><span class="bp">self</span>, </span><span class="param"><span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span></span><span class="return-annotation">) -> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>:</span></span>
 
                 <label class="view-source-button" for="Net.forward-view-source"><span>View Source</span></label>
 
     </div>
     <a class="headerlink" href="#Net.forward"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="Net.forward-22"><a href="#Net.forward-22"><span class="linenos">22</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
-</span><span id="Net.forward-23"><a href="#Net.forward-23"><span class="linenos">23</span></a><span class="w">        </span><span class="sd">"""Run a forward pass.</span>
-</span><span id="Net.forward-24"><a href="#Net.forward-24"><span class="linenos">24</span></a><span class="sd">        </span>
-</span><span id="Net.forward-25"><a href="#Net.forward-25"><span class="linenos">25</span></a><span class="sd">        Parameters</span>
-</span><span id="Net.forward-26"><a href="#Net.forward-26"><span class="linenos">26</span></a><span class="sd">        ----------</span>
-</span><span id="Net.forward-27"><a href="#Net.forward-27"><span class="linenos">27</span></a><span class="sd">        x : torch.Tensor</span>
-</span><span id="Net.forward-28"><a href="#Net.forward-28"><span class="linenos">28</span></a><span class="sd">            Input tensor, shape (batch_size, input_dim).</span>
-</span><span id="Net.forward-29"><a href="#Net.forward-29"><span class="linenos">29</span></a><span class="sd">        </span>
-</span><span id="Net.forward-30"><a href="#Net.forward-30"><span class="linenos">30</span></a><span class="sd">        Returns</span>
-</span><span id="Net.forward-31"><a href="#Net.forward-31"><span class="linenos">31</span></a><span class="sd">        -------</span>
-</span><span id="Net.forward-32"><a href="#Net.forward-32"><span class="linenos">32</span></a><span class="sd">        torch.Tensor</span>
-</span><span id="Net.forward-33"><a href="#Net.forward-33"><span class="linenos">33</span></a><span class="sd">            Output logits, shape (batch_size, num_classes).</span>
-</span><span id="Net.forward-34"><a href="#Net.forward-34"><span class="linenos">34</span></a><span class="sd">        """</span>
-</span><span id="Net.forward-35"><a href="#Net.forward-35"><span class="linenos">35</span></a>        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
-</span><span id="Net.forward-36"><a href="#Net.forward-36"><span class="linenos">36</span></a>        <span class="c1"># x = torch.relu(self.fc2(x))</span>
-</span><span id="Net.forward-37"><a href="#Net.forward-37"><span class="linenos">37</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="Net.forward-36"><a href="#Net.forward-36"><span class="linenos">36</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+</span><span id="Net.forward-37"><a href="#Net.forward-37"><span class="linenos">37</span></a><span class="w">        </span><span class="sd">"""Run a forward pass through the network.</span>
+</span><span id="Net.forward-38"><a href="#Net.forward-38"><span class="linenos">38</span></a>
+</span><span id="Net.forward-39"><a href="#Net.forward-39"><span class="linenos">39</span></a><span class="sd">        Parameters</span>
+</span><span id="Net.forward-40"><a href="#Net.forward-40"><span class="linenos">40</span></a><span class="sd">        ----------</span>
+</span><span id="Net.forward-41"><a href="#Net.forward-41"><span class="linenos">41</span></a><span class="sd">        x : torch.Tensor</span>
+</span><span id="Net.forward-42"><a href="#Net.forward-42"><span class="linenos">42</span></a><span class="sd">            Input tensor of shape ``(batch_size, input_dim)``.</span>
+</span><span id="Net.forward-43"><a href="#Net.forward-43"><span class="linenos">43</span></a>
+</span><span id="Net.forward-44"><a href="#Net.forward-44"><span class="linenos">44</span></a><span class="sd">        Returns</span>
+</span><span id="Net.forward-45"><a href="#Net.forward-45"><span class="linenos">45</span></a><span class="sd">        -------</span>
+</span><span id="Net.forward-46"><a href="#Net.forward-46"><span class="linenos">46</span></a><span class="sd">        torch.Tensor</span>
+</span><span id="Net.forward-47"><a href="#Net.forward-47"><span class="linenos">47</span></a><span class="sd">            Output logits of shape ``(batch_size, num_classes)``.</span>
+</span><span id="Net.forward-48"><a href="#Net.forward-48"><span class="linenos">48</span></a><span class="sd">        """</span>
+</span><span id="Net.forward-49"><a href="#Net.forward-49"><span class="linenos">49</span></a>        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">relu</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fc1</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+</span><span id="Net.forward-50"><a href="#Net.forward-50"><span class="linenos">50</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fc3</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
 </span></pre></div>
 
 
-            <div class="docstring"><p>Run a forward pass.</p>
+            <div class="docstring"><p>Run a forward pass through the network.</p>
 
-<h2 id="parameters">Parameters</h2>
+<h6 id="parameters">Parameters</h6>
 
-<p>x : torch.Tensor
-    Input tensor, shape (batch_size, input_dim).</p>
+<ul>
+<li><strong>x</strong> (torch.Tensor):
+Input tensor of shape <code>(batch_size, input_dim)</code>.</li>
+</ul>
 
-<h2 id="returns">Returns</h2>
+<h6 id="returns">Returns</h6>
 
-<p>torch.Tensor
-    Output logits, shape (batch_size, num_classes).</p>
+<ul>
+<li><strong>torch.Tensor</strong>: Output logits of shape <code>(batch_size, num_classes)</code>.</li>
+</ul>
 </div>
 
 

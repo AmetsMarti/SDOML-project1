@@ -1,19 +1,22 @@
-"""Plotting functions for training results."""
 
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import ConfusionMatrixDisplay
 
 
-def plot_loss_accuracy(metrics, save_path=None):
+def plot_loss_accuracy(metrics: dict, save_path=None) -> None:
     """Plot training and validation loss/accuracy curves.
+
+    Creates a 2x2 subplot grid showing training loss, training accuracy,
+    validation loss, and validation accuracy across epochs.
 
     Parameters
     ----------
     metrics : dict
         Output from :func:`sdoml_task1.modeling.train.train`.
-        Must contain ``loss_train``, ``accuracy_train``,
-        ``loss_val``, ``accuracy_val``.
+        Must contain ``"loss_train"``, ``"accuracy_train"``,
+        ``"loss_val"``, and ``"accuracy_val"`` keys, each mapping
+        to a list of per-epoch values.
     save_path : str or pathlib.Path, optional
         If provided, save the figure to this path.
     """
@@ -52,15 +55,20 @@ def plot_loss_accuracy(metrics, save_path=None):
     plt.show()
 
 
-def plot_confusion_matrices(confusion_matrices, save_path=None):
-    """Plot confusion matrix for every epoch.
+def plot_confusion_matrices(confusion_matrices: list, save_path=None) -> None:
+    """Plot confusion matrices for every epoch.
+
+    Displays confusion matrices in a grid with 5 columns, one matrix
+    per epoch.
 
     Parameters
     ----------
     confusion_matrices : list of np.ndarray
-        Confusion matrices, one per epoch.
+        Confusion matrices, one per epoch. Each is of shape
+        ``(n_classes, n_classes)``.
     save_path : str or pathlib.Path, optional
         If provided, save the figure to this path.
+
     """
     n = len(confusion_matrices)
     cols = 5
@@ -85,15 +93,15 @@ def plot_confusion_matrices(confusion_matrices, save_path=None):
     plt.show()
 
 
-def plot_confusion_matrix_epoch(cm, epoch, save_path=None):
+def plot_confusion_matrix_epoch(cm: np.ndarray, epoch: int, save_path=None) -> None:
     """Plot a single confusion matrix.
 
     Parameters
     ----------
     cm : np.ndarray
-        Confusion matrix.
+        Confusion matrix of shape ``(n_classes, n_classes)``.
     epoch : int
-        Epoch number (used in the title).
+        Epoch number (used in the plot title).
     save_path : str or pathlib.Path, optional
         If provided, save the figure to this path.
     """
