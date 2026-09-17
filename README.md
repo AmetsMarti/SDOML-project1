@@ -1,6 +1,7 @@
 
 
 ## Spoken Digit Classification
+*Amets Martiarena, Teva Philippe, Alvaro Crespo*
 
 ### Project description
 This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. It uses the Adam optimizer and the cross-entropy loss function.
