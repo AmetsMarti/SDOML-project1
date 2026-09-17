@@ -1,9 +1,6 @@
-# sdoml-task1
 
-## Project 1: Project Structure, Training and Visualization
 
-### Overview
-This project lays the foundation for a machine learning project that will grow throughout the semester. For the first part, we are required to create the structure for the ML project, train a simple model on a public dataset, visually explore the dataset and evaluate the model's performance.
+## Spoken Digit Classification
 
 ### Project description
 This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. It uses the Adam optimizer and the cross-entropy loss function.
@@ -23,32 +20,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
-**Adding new dependencies:**
-```bash
-# Add a new dependency
-uv add <package-name>
-
-# Add a development dependency
-uv add --dev <package-name>
-```
-
-**Key features:**
-- `uv.lock` ensures reproducible builds across systems
-- Dependencies are pinned in `pyproject.toml` with minimum version constraints
-- Run `uv sync` to install all dependencies in a virtual environment
-
 ### Documentation
-
-#### Code Documentation
-All modules, classes, and functions are documented using NumPy-style docstrings. The documentation includes:
-- Module-level docstrings describing the purpose and contents
-- Class docstrings with Parameters sections
-- Function docstrings with Parameters, Returns, and Examples sections
-- Type annotations in docstrings for clarity
-
-#### Generating HTML Documentation
-To generate the HTML documentation using pdoc:
-
 ```bash
 # Using Make
 make docs
@@ -58,13 +30,7 @@ pdoc sdoml_task1 -o docs --docformat numpy
 ```
 
 The generated documentation will be available in the `docs/` directory. Open `docs/index.html` in a browser to view the documentation.
-
-#### Viewing Documentation
-The HTML documentation is structured similarly to NumPy/Scikit-learn/PyTorch documentation:
-- Module index for overview
-- Class and function documentation with parameters and return values
-- Cross-references between related functions
-- Searchable content
+See the documentation in [https://ametsmarti.github.io/SDOML-project1/]
 
 ### Project Organization
 The project is organized by making use of the [cookie cutter template](https://cookiecutter-data-science.drivendata.org/)
@@ -122,12 +88,3 @@ The project is organized by making use of the [cookie cutter template](https://c
 ```
 
 --------
-
-### Documentation
-
-You can access to the pdoc documentation of the project in docs -> sdoml_task1 -> index.html .
-
-
-
-
-
