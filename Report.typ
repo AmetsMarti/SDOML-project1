@@ -147,7 +147,7 @@ Above, we show the changes between the first round, the 10th round, and the 40th
 #v(1em)
 
 #figure(
-  image("assets/loss_accuracy.png", width: 80%),
+  image("assets/model_analysis/loss_accuracy_comparison.png", width: 80%),
   caption: [Training and validation loss/accuracy over 40 epochs]
 )
 
