@@ -64,7 +64,7 @@ The dataset has digit labels and speakers metadata information, for the classifi
   gutter: 1em,
 
    figure(
-   image("assets/dataset_gender_distribution.png", width: 100%),
+   image("assets/dataset_analysis/dataset_gender_distribution.png", width: 100%),
    caption: [Bar Chart]
    )
 )
@@ -73,7 +73,7 @@ The dataset has digit labels and speakers metadata information, for the classifi
   columns: (1fr),
   gutter: 1em,
    figure(
-   image("assets/dataset_accent_distribution.png", width: 100%),
+   image("assets/dataset_analysis/dataset_accent_distribution.png", width: 100%),
    caption: [Boxplot]
    )
 )
@@ -82,7 +82,7 @@ The dataset has digit labels and speakers metadata information, for the classifi
   columns: (1fr),
   gutter: 1em,
    figure(
-   image("assets/dataset_age_gender.png", width: 100%),
+   image("assets/dataset_analysis/dataset_age_gender.png", width: 100%),
    caption: [Boxplot]
    )
 )
