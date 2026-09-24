@@ -3,6 +3,8 @@
 ## Spoken Digit Classification
 *Amets Martiarena, Teva Philippe, Alvaro Crespo*
 
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://ametsmarti.github.io/SDOML-project1/)
+
 ### Project description
 This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. It uses the Adam optimizer and the cross-entropy loss function.
 
@@ -22,6 +24,12 @@ uv sync
 ```
 
 ### Documentation
+
+The published documentation is available at:
+
+**[https://ametsmarti.github.io/SDOML-project1/](https://ametsmarti.github.io/SDOML-project1/)**
+
+To regenerate it locally:
 ```bash
 # Using Make
 make docs
@@ -31,7 +39,6 @@ pdoc sdoml_task1 -o docs --docformat numpy
 ```
 
 The generated documentation will be available in the `docs/` directory. Open `docs/index.html` in a browser to view the documentation.
-See the documentation in [https://ametsmarti.github.io/SDOML-project1/]
 
 ### Project Organization
 The project is organized by making use of the [cookie cutter template](https://cookiecutter-data-science.drivendata.org/)

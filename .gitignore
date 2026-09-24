@@ -7,9 +7,19 @@ __pycache__/
 dist/
 build/
 uv.lock
+./Report.pdf
+
+# Regenerable figures (produced by notebooks 00 and 02)
+assets/**
+!assets/.gitkeep
+!assets/dataset_analysis/
+!assets/dataset_analysis/.gitkeep
+!assets/model_analysis/
+!assets/model_analysis/.gitkeep
 
 
 .ipynb_checkpoints/
+.ruff_cache/
 
 data/raw/*
 data/processed/*.csv
@@ -18,12 +28,17 @@ data/interim/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/interim/.gitkeep
-Report.pdf
 
+# Training artifacts (regenerable by running the notebooks)
+runs/
 models/*.pt
 models/*.pth
 models/*.onnx
+models/*.pkl
 !models/.gitkeep
+
+# Compiled report (regenerated from Report.typ, e.g. with typst)
+Report.pdf
 
 # Environment variables
 .env
@@ -31,4 +46,3 @@ models/*.onnx
 # OS
 .DS_Store
 Thumbs.db
-pyproject.toml
