@@ -6,7 +6,6 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-uv.lock
 
 
 .ipynb_checkpoints/
@@ -18,7 +17,7 @@ data/interim/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/interim/.gitkeep
-Report.pdf
+Report.typ
 
 models/*.pt
 models/*.pth
