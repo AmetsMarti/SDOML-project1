@@ -6,22 +6,23 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-
+assets/
 
 .ipynb_checkpoints/
 
 data/raw/*
 data/processed/*.csv
 data/processed/*.parquet
+data/processed/*
 data/interim/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/interim/.gitkeep
 Report.typ
-
-models/*.pt
-models/*.pth
-models/*.onnx
+models/*
+models/*
+models/*
+runs/
 !models/.gitkeep
 
 # Environment variables
@@ -31,3 +32,4 @@ models/*.onnx
 .DS_Store
 Thumbs.db
 pyproject.toml
+
