@@ -1,0 +1,15 @@
+{# Top-level index.html. pdoc's stock version is a bare meta refresh, which some #}
+{# viewers ignore and render as an empty page, so we also emit a visible link. #}
+{# There is a single top-level module here, so the redirect always points to it. #}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="refresh" content="0; url=./{{ root_module_name.replace(".", "/") }}.html"/>
+    <title>{{ root_module_name }} API documentation</title>
+</head>
+<body>
+    <p><a href="./{{ root_module_name.replace(".", "/") }}.html">{{ root_module_name }} documentation</a></p>
+</body>
+</html>

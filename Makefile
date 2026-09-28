@@ -42,7 +42,7 @@ format:
 ## Generate HTML documentation with pdoc
 .PHONY: docs
 docs:
-	uv run pdoc sdoml_task1 -o docs --docformat numpy
+	uv run pdoc sdoml_task1 -o docs --docformat numpy -t templates
 	@echo "Documentation generated in docs/"
 
 

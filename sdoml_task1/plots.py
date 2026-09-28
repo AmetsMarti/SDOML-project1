@@ -1,3 +1,9 @@
+"""Figures for the notebooks and the report: training curves and confusion matrices.
+
+Every helper accepts an optional ``save_path`` and a ``show`` flag, so the same
+call works interactively and when writing the plots to ``reports/figures``.
+"""
+
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import ConfusionMatrixDisplay
