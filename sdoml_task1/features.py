@@ -1,3 +1,8 @@
+"""Feature extraction: from raw audio to the matrix the model trains on.
+
+Clips are decoded with soundfile, transformed with librosa, and reduced to a
+fixed-length vector so the whole dataset can be materialized in memory.
+"""
 
 import io
 

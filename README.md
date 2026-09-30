@@ -35,10 +35,11 @@ To regenerate it locally:
 make docs
 
 # Or directly with pdoc
-pdoc sdoml_task1 -o docs --docformat numpy
+pdoc sdoml_task1 -o docs --docformat numpy -t templates
 ```
 
-The generated documentation will be available in the `docs/` directory. Open `docs/index.html` in a browser to view the documentation.
+The generated documentation will be available in the `docs/` directory. Open `docs/index.html` in a browser to view the documentation (it redirects to the package page, which starts with this README).
+See the documentation in [https://ametsmarti.github.io/SDOML-project1/]
 
 ### Project Organization
 The project is organized by making use of the [cookie cutter template](https://cookiecutter-data-science.drivendata.org/)

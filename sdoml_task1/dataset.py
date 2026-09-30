@@ -1,7 +1,13 @@
+"""Dataset wrapper around the precomputed features.
+
+Feature extraction is done once in the notebook; this module only turns the
+resulting arrays into something a ``DataLoader`` can iterate over.
+"""
 
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+
 
 class AudioMNISTFeaturesDataset(Dataset):
     """PyTorch Dataset for audio features.

@@ -21,6 +21,11 @@
             <input type="search" placeholder="Search..." role="searchbox" aria-label="search"
                    pattern=".+" required>
 
+            <h2>Contents</h2>
+            <ul>
+  <li><a href="#spoken-digit-classification">Spoken Digit Classification</a></li>
+</ul>
+
 
             <h2>Submodules</h2>
             <ul>
@@ -45,12 +50,126 @@
                     <h1 class="modulename">
 sdoml_task1    </h1>
 
-                
+                        <div class="docstring"><p>Spoken digit classification (SDOML Task 1).</p>
+
+<p>Data handling lives in <code><a href="sdoml_task1/dataset.html">sdoml_task1.dataset</a></code> and <code><a href="sdoml_task1/features.html">sdoml_task1.features</a></code>,
+training and inference in <code><a href="sdoml_task1/modeling.html">sdoml_task1.modeling</a></code>, and the figures used in the
+report in <code><a href="sdoml_task1/plots.html">sdoml_task1.plots</a></code>.</p>
+
+<h2 id="spoken-digit-classification">Spoken Digit Classification</h2>
+
+<p><em>Amets Martiarena, Teva Philippe, Alvaro Crespo</em></p>
+
+<h3 id="project-description">Project description</h3>
+
+<p>This project uses the <a href="https://huggingface.co/datasets/gilkeyio/AudioMNIST">Audio MNIST Dataset</a> to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. It uses the Adam optimizer and the cross-entropy loss function.</p>
+
+<h3 id="running-the-code">Running the code</h3>
+
+<p>In order to run the jupyter notebook, you can use <code>uv sync</code> to create an environment and synchronize the dependencies. Depending on your code editor, you might need to manually select the created environment as a Python kernel. For a more detailed description of all the project's requirements, please check <code>pyproject.toml</code>. The notebooks are divided into two: The 00 notebook downloads and visualizes the data. The 01 notebooks performs the feature extracion and model training.</p>
+
+<h3 id="dependency-management-with-uv">Dependency Management with uv</h3>
+
+<p>This project uses <a href="https://docs.astral.sh/uv/">uv</a> for dependency management and virtual environment handling.</p>
+
+<p><strong>Setup on a fresh system:</strong></p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="c1"># Install uv (if not already installed)</span>
+curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+
+<span class="c1"># Create virtual environment and install dependencies</span>
+uv<span class="w"> </span>sync
+</code></pre>
+</div>
+
+<h3 id="documentation">Documentation</h3>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code><span class="c1"># Using Make</span>
+make<span class="w"> </span>docs
+
+<span class="c1"># Or directly with pdoc</span>
+pdoc<span class="w"> </span>sdoml_task1<span class="w"> </span>-o<span class="w"> </span>docs<span class="w"> </span>--docformat<span class="w"> </span>numpy<span class="w"> </span>-t<span class="w"> </span>templates
+</code></pre>
+</div>
+
+<p>The generated documentation will be available in the <code>docs/</code> directory. Open <code>docs/index.html</code> in a browser to view the documentation (it redirects to the package page, which starts with this README).
+See the documentation in [<a href="https://ametsmarti.github.io/SDOML-project1/]">https://ametsmarti.github.io/SDOML-project1/]</a></p>
+
+<h3 id="project-organization">Project Organization</h3>
+
+<p>The project is organized by making use of the <a href="https://cookiecutter-data-science.drivendata.org/">cookie cutter template</a></p>
+
+<a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
+    <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
+</a>
+
+<pre><code>├── LICENSE            &lt;- Open-source license if one is chosen
+├── Makefile           &lt;- Makefile with convenience commands like `make data` or `make train`
+├── README.md          &lt;- The top-level README for developers using this project.
+├── data
+│   ├── external       &lt;- Data from third party sources.
+│   ├── interim        &lt;- Intermediate data that has been transformed.
+│   ├── processed      &lt;- The final, canonical data sets for modeling.
+│   └── raw            &lt;- The original, immutable data dump.
+│
+├── docs               &lt;- Contain documentation of the project
+│
+├── models             &lt;- Trained and serialized models, model predictions, or model summaries
+│
+├── notebooks          &lt;- Jupyter notebooks. Naming convention is a number (for ordering),
+│                         the creator's initials, and a short `-` delimited description, e.g.
+│                         `1.0-jqp-initial-data-exploration`.
+│
+├── pyproject.toml     &lt;- Project configuration file with package metadata for 
+│                         sdoml_task1 and configuration for tools like black
+│
+├── references         &lt;- Data dictionaries, manuals, and all other explanatory materials.
+│
+├── reports            &lt;- Generated analysis as HTML, PDF, LaTeX, etc.
+│   └── figures        &lt;- Generated graphics and figures to be used in reporting
+│
+├── requirements.txt   &lt;- The requirements file for reproducing the analysis environment, e.g.
+│                         generated with `pip freeze &gt; requirements.txt`
+│
+├── setup.cfg          &lt;- Configuration file for flake8
+│
+└── sdoml_task1   &lt;- Source code for use in this project.
+    │
+    ├── __init__.py             &lt;- Makes sdoml_task1 a Python module
+    │
+    ├── config.py               &lt;- Store useful variables and configuration
+    │
+    ├── dataset.py              &lt;- Scripts to download or generate data
+    │
+    ├── features.py             &lt;- Code to create features for modeling
+    │
+    ├── modeling                
+    │   ├── __init__.py 
+    │   ├── predict.py          &lt;- Code to run model inference with trained models          
+    │   └── train.py            &lt;- Code to train models
+    │
+    └── plots.py                &lt;- Code to create visualizations
+</code></pre>
+
+<hr />
+</div>
+
                         <input id="mod-sdoml_task1-view-source" class="view-source-toggle-state" type="checkbox" aria-hidden="true" tabindex="-1">
 
                         <label class="view-source-button" for="mod-sdoml_task1-view-source"><span>View Source</span></label>
 
-                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos">1</span></a><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"config"</span><span class="p">,</span> <span class="s2">"dataset"</span><span class="p">,</span> <span class="s2">"features"</span><span class="p">,</span> <span class="s2">"plots"</span><span class="p">,</span> <span class="s2">"modeling"</span><span class="p">]</span>
+                        <div class="pdoc-code codehilite"><pre><span></span><span id="L-1"><a href="#L-1"><span class="linenos"> 1</span></a><span class="sd">"""Spoken digit classification (SDOML Task 1).</span>
+</span><span id="L-2"><a href="#L-2"><span class="linenos"> 2</span></a>
+</span><span id="L-3"><a href="#L-3"><span class="linenos"> 3</span></a><span class="sd">Data handling lives in :mod:`sdoml_task1.dataset` and :mod:`sdoml_task1.features`,</span>
+</span><span id="L-4"><a href="#L-4"><span class="linenos"> 4</span></a><span class="sd">training and inference in :mod:`sdoml_task1.modeling`, and the figures used in the</span>
+</span><span id="L-5"><a href="#L-5"><span class="linenos"> 5</span></a><span class="sd">report in :mod:`sdoml_task1.plots`.</span>
+</span><span id="L-6"><a href="#L-6"><span class="linenos"> 6</span></a>
+</span><span id="L-7"><a href="#L-7"><span class="linenos"> 7</span></a><span class="sd">.. include:: ../README.md</span>
+</span><span id="L-8"><a href="#L-8"><span class="linenos"> 8</span></a><span class="sd">"""</span>
+</span><span id="L-9"><a href="#L-9"><span class="linenos"> 9</span></a>
+</span><span id="L-10"><a href="#L-10"><span class="linenos">10</span></a><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"config"</span><span class="p">,</span> <span class="s2">"dataset"</span><span class="p">,</span> <span class="s2">"features"</span><span class="p">,</span> <span class="s2">"plots"</span><span class="p">,</span> <span class="s2">"modeling"</span><span class="p">]</span>
 </span></pre></div>
 
 

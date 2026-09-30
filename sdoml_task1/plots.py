@@ -1,10 +1,15 @@
+"""Figures for the notebooks and the report: training curves and confusion matrices.
+
+Every helper accepts an optional ``save_path`` and a ``show`` flag, so the same
+call works interactively and when writing the plots to ``reports/figures``.
+"""
 
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import ConfusionMatrixDisplay
 
 
-def plot_loss_accuracy(metrics: dict, save_path=None) -> None:
+def plot_loss_accuracy(metrics: dict, save_path=None, show=True) -> None:
     """Plot training and validation loss/accuracy curves.
 
     Creates a 2x2 subplot grid showing training loss, training accuracy,
@@ -19,6 +24,8 @@ def plot_loss_accuracy(metrics: dict, save_path=None) -> None:
         to a list of per-epoch values.
     save_path : str or pathlib.Path, optional
         If provided, save the figure to this path.
+    show : bool, default=True
+        If True, display the figure. If False, close it without displaying.
     """
     _, axs = plt.subplots(2, 2, figsize=(12, 8))
     ax1, ax2, ax3, ax4 = axs.flatten()
@@ -52,10 +59,13 @@ def plot_loss_accuracy(metrics: dict, save_path=None) -> None:
     if save_path is not None:
         plt.savefig(save_path, dpi=150, bbox_inches="tight")
 
-    plt.show()
+    if show:
+        plt.show()
+    else:
+        plt.close()
 
 
-def plot_confusion_matrices(confusion_matrices: list, save_path=None) -> None:
+def plot_confusion_matrices(confusion_matrices: list, save_path=None, show=True) -> None:
     """Plot confusion matrices for every epoch.
 
     Displays confusion matrices in a grid with 5 columns, one matrix
@@ -68,6 +78,8 @@ def plot_confusion_matrices(confusion_matrices: list, save_path=None) -> None:
         ``(n_classes, n_classes)``.
     save_path : str or pathlib.Path, optional
         If provided, save the figure to this path.
+    show : bool, default=True
+        If True, display the figure. If False, close it without displaying.
 
     """
     n = len(confusion_matrices)
@@ -90,10 +102,13 @@ def plot_confusion_matrices(confusion_matrices: list, save_path=None) -> None:
     if save_path is not None:
         plt.savefig(save_path, dpi=150, bbox_inches="tight")
 
-    plt.show()
+    if show:
+        plt.show()
+    else:
+        plt.close()
 
 
-def plot_confusion_matrix_epoch(cm: np.ndarray, epoch: int, save_path=None) -> None:
+def plot_confusion_matrix_epoch(cm: np.ndarray, epoch: int, save_path=None, show=True) -> None:
     """Plot a single confusion matrix.
 
     Parameters
@@ -104,6 +119,8 @@ def plot_confusion_matrix_epoch(cm: np.ndarray, epoch: int, save_path=None) -> N
         Epoch number (used in the plot title).
     save_path : str or pathlib.Path, optional
         If provided, save the figure to this path.
+    show : bool, default=True
+        If True, display the figure. If False, close it without displaying.
     """
     _, ax = plt.subplots(figsize=(6, 5))
     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=range(10))
@@ -114,4 +131,7 @@ def plot_confusion_matrix_epoch(cm: np.ndarray, epoch: int, save_path=None) -> N
     if save_path is not None:
         plt.savefig(save_path, dpi=150, bbox_inches="tight")
 
-    plt.show()
+    if show:
+        plt.show()
+    else:
+        plt.close()

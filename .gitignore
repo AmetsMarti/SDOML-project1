@@ -6,17 +6,7 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-uv.lock
-./Report.pdf
-
-# Regenerable figures (produced by notebooks 00 and 02)
-assets/**
-!assets/.gitkeep
-!assets/dataset_analysis/
-!assets/dataset_analysis/.gitkeep
-!assets/model_analysis/
-!assets/model_analysis/.gitkeep
-
+assets/
 
 .ipynb_checkpoints/
 .ruff_cache/
@@ -24,17 +14,16 @@ assets/**
 data/raw/*
 data/processed/*.csv
 data/processed/*.parquet
+data/processed/*
 data/interim/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/interim/.gitkeep
-
-# Training artifacts (regenerable by running the notebooks)
+Report.typ
+models/*
+models/*
+models/*
 runs/
-models/*.pt
-models/*.pth
-models/*.onnx
-models/*.pkl
 !models/.gitkeep
 
 # Compiled report (regenerated from Report.typ, e.g. with typst)
@@ -46,3 +35,5 @@ Report.pdf
 # OS
 .DS_Store
 Thumbs.db
+pyproject.toml
+
