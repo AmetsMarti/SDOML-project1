@@ -19,7 +19,7 @@ from sdoml_task1.modeling.optimization import make_optimizer, make_scheduler
 from pathlib import Path
 import pickle
 
-def train(model, train_loader, val_loader, epochs=40, lr=1e-4, optimizer_name="Adam", scheduler_name=None, limit_epoch=10, device=None):
+def train(model, train_loader, val_loader, epochs=40, lr=1e-4, optimizer_name="Adam", scheduler_name=None, limit_epoch=10, device=None, on_epoch_end=None):
     """Train a classifier and return metrics per epoch.
 
     The regularization is read from ``model.regularization``:
@@ -48,6 +48,10 @@ def train(model, train_loader, val_loader, epochs=40, lr=1e-4, optimizer_name="A
         Patience for early stopping.
     device : str or torch.device, optional
         If None, uses CUDA when available, otherwise CPU.
+    on_epoch_end : callable, optional
+        Function called at the end of each epoch as
+        ``on_epoch_end(epoch, epochs, train_loss, val_loss, val_acc)``.
+        Used for example to update a progress bar.
 
     Returns
     -------
@@ -130,6 +134,9 @@ def train(model, train_loader, val_loader, epochs=40, lr=1e-4, optimizer_name="A
         if scheduler is not None:
             scheduler.step()
 
+        if on_epoch_end is not None:
+            on_epoch_end(epoch + 1, epochs, train_losses[-1], val_loss, val_accs[-1])
+            
         print(f'Epoch [{epoch+1}/{epochs}], Train Loss: {train_losses[-1]:.4f}, '
               f'Val Loss: {val_loss:.4f}, Val Acc: {val_accs[-1]:.4f}')
 
@@ -190,7 +197,7 @@ def save_run(metrics, save_dir):
 
     print(f"Model and history saved in {save_dir}")
     
-def run_training(X_train, y_train, X_test, y_test, hidden_sizes=(64,), activation_function="relu", regularization=None, reg_param=0.0, optimizer_name="Adam", scheduler_name=None, epochs=40, lr=1e-4, batch_size=64, limit_epoch=10, seed=42):
+def run_training(X_train, y_train, X_test, y_test, hidden_sizes=(64,), activation_function="relu", regularization=None, reg_param=0.0, optimizer_name="Adam", scheduler_name=None, epochs=40, lr=1e-4, batch_size=64, limit_epoch=10, seed=42, on_epoch_end=None):
     """Build the data loaders and the model, then train it.
 
     This is the single entry point used by both the training notebook
@@ -257,7 +264,7 @@ def run_training(X_train, y_train, X_test, y_test, hidden_sizes=(64,), activatio
     test_loader = DataLoader(test_dataset, batch_size=batch_size)
 
     net = Net(input_dim=X_train.shape[1], hidden_sizes=hidden_sizes, activation_function=activation_function, regularization=regularization, reg_param=reg_param)
-    metrics = train(net, loader, test_loader, epochs=epochs, lr=lr, optimizer_name=optimizer_name, scheduler_name=scheduler_name, limit_epoch=limit_epoch)
+    metrics = train(net, loader, test_loader, epochs=epochs, lr=lr, optimizer_name=optimizer_name, scheduler_name=scheduler_name, limit_epoch=limit_epoch, on_epoch_end=on_epoch_end)
 
     metrics["config"] = {
         "input_dim": X_train.shape[1],
