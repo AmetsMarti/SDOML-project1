@@ -12,13 +12,14 @@ ModelLoader
 """
 
 from pathlib import Path
+import re
 
 import librosa
 import numpy as np
 import torch
 import torch.nn.functional as F
 
-from sdoml_task1.config import PROJECT_DIR
+from sdoml_task1.config import MODEL_DIR, PROJECT_DIR
 from sdoml_task1.features import extract_features
 from sdoml_task1.modeling.model import Net
 
@@ -35,17 +36,19 @@ class ModelLoader:
         An already-built network. When omitted, the checkpoint resolved by
         ``run_id`` is loaded instead.
     run_id : str, optional
-        UUID of the run to load from ``runs/``. Defaults to the most recently
-        written checkpoint.
+        UUID of the run to load from ``runs/``. When omitted,
+        ``models/model.pt`` is used if it exists, otherwise the most recently
+        written checkpoint under ``runs/``.
     device : str or torch.device, optional
         Device to run the forward pass on. Defaults to CPU so the loader also
         works on machines without CUDA.
 
-
     Raises
     ------
     FileNotFoundError
-        If no matching checkpoint exists under ``runs/``.
+        If the requested checkpoint does not exist.
+    ValueError
+        If the checkpoint does not describe a network :class:`Net` can rebuild.
     """
 
     def __init__(
@@ -56,12 +59,45 @@ class ModelLoader:
     ) -> None:
         self.device = torch.device(device)
         if model is None:
-            checkpoint = self._latest_checkpoint(run_id)
+            checkpoint = self._resolve_checkpoint(run_id)
             state_dict = torch.load(checkpoint, map_location="cpu", weights_only=True)
-            model = Net(input_dim=state_dict["fc1.weight"].shape[1])
-            model.load_state_dict(state_dict)
+            model = self._build_model(state_dict, checkpoint)
+
         self.model = model.to(self.device)
         self.model.eval()
+
+    @classmethod
+    def _resolve_checkpoint(cls, run_id: str | None = None) -> Path:
+        """Pick the checkpoint to load: ``run_id``, the published model, then the newest run.
+
+        Parameters
+        ----------
+        run_id : str, optional
+            UUID of a run under ``runs/``. When given, no fallback is used.
+
+        Returns
+        -------
+        pathlib.Path
+            Path to an existing ``model.pt``.
+
+        Raises
+        ------
+        FileNotFoundError
+            If neither the published model nor any run holds a checkpoint.
+        """
+        if run_id is None:
+            published = MODEL_DIR / "model.pt"
+            if published.is_file():
+                return published
+            try:
+                return cls._latest_checkpoint()
+            except FileNotFoundError:
+                raise FileNotFoundError(
+                    f"No checkpoint found: expected {published} or a model.pt under {RUNS_DIR}."
+                    " Train a model first (notebooks/01_audio_training.ipynb) and save it with"
+                    " sdoml_task1.modeling.train.save_run()."
+                ) from None
+        return cls._latest_checkpoint(run_id)
 
     @staticmethod
     def _latest_checkpoint(run_id: str | None = None) -> Path:
@@ -93,6 +129,68 @@ class ModelLoader:
         if not checkpoints:
             raise FileNotFoundError(f"No checkpoint found under {RUNS_DIR}")
         return checkpoints[-1]
+
+    @staticmethod
+    def _build_model(state_dict: dict[str, torch.Tensor], checkpoint: Path) -> Net:
+        """Rebuild a :class:`Net` from the shapes stored in a checkpoint.
+
+        The topology (input size, hidden layers, number of classes) is read
+        from the weight matrices, and legacy layer names such as ``fc1``/``fc3``
+        are mapped onto the current ``lst.*`` names, so checkpoints written
+        before the model was refactored keep loading.
+
+        Parameters
+        ----------
+        state_dict : dict
+            Weights as read from a checkpoint file.
+        checkpoint : pathlib.Path
+            Only used to point at the offending file in error messages.
+
+        Returns
+        -------
+        Net
+            A network matching the checkpoint, weights already loaded.
+
+        Raises
+        ------
+        ValueError
+            If the tensors do not describe a stack of ``Net`` linear layers.
+        """
+
+        def layer_index(key: str) -> int:
+            digits = re.findall(r"\d+", key)
+            return int(digits[-1]) if digits else -1
+
+        weight_keys = sorted((k for k, v in state_dict.items() if v.ndim == 2), key=layer_index)
+        bias_keys = sorted((k for k, v in state_dict.items() if v.ndim == 1), key=layer_index)
+        shapes = [tuple(state_dict[k].shape) for k in weight_keys]
+
+        if len(shapes) < 2:
+            raise ValueError(
+                f"{checkpoint} does not describe a Net: found {len(shapes)} linear layer(s),"
+                " at least 2 are required (one hidden layer plus the output layer)."
+            )
+        if len(bias_keys) != len(weight_keys):
+            raise ValueError(
+                f"{checkpoint} mixes biased and bias-free layers:"
+                f" {len(weight_keys)} weight tensors vs {len(bias_keys)} bias tensors."
+            )
+        for i, (out_dim, in_dim) in enumerate(shapes):
+            if i and in_dim != shapes[i - 1][0]:
+                raise ValueError(
+                    f"{checkpoint} has inconsistent layer shapes {shapes}: layer {i} takes"
+                    f" {in_dim} inputs but layer {i - 1} produces {shapes[i - 1][0]}."
+                )
+
+        input_dim = shapes[0][1]
+        hidden_sizes = tuple(out_dim for out_dim, _ in shapes[:-1])
+        num_classes = shapes[-1][0]
+
+        model = Net(input_dim=input_dim, hidden_sizes=hidden_sizes, num_classes=num_classes)
+        canonical = {f"lst.{i}.weight": state_dict[k] for i, k in enumerate(weight_keys)}
+        canonical.update({f"lst.{i}.bias": state_dict[k] for i, k in enumerate(bias_keys)})
+        model.load_state_dict(canonical)
+        return model
 
     @torch.no_grad()
     def _predict(self, X: torch.Tensor) -> np.ndarray:

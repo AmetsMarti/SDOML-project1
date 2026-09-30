@@ -16,7 +16,7 @@ RAW_DATA_DIR = DATA_DIR / "raw"
 """Original dataset as downloaded, never modified in place."""
 
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
-"""Feature files written by the notebooks (CSV/Parquet)."""
+"""Feature pickle files"""
 
 MODEL_DIR = PROJECT_DIR / "models"
 """Trained checkpoints. Kept out of git."""

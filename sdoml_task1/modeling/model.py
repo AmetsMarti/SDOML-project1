@@ -9,8 +9,9 @@ Net
     A simple feedforward network with ReLU activations.
 
 """
-import torch
-import torch.nn as nn
+
+from torch import nn
+
 
 class Net(nn.Module):
     """Configurable multilayer perceptron for digit classification.
@@ -38,7 +39,15 @@ class Net(nn.Module):
     ...             regularization="dropout", reg_param=0.2)
     """
 
-    def __init__(self, input_dim=26, hidden_sizes=(64,), num_classes=10, activation_function="relu", regularization=None, reg_param=0.0):
+    def __init__(
+        self,
+        input_dim=26,
+        hidden_sizes=(64,),
+        num_classes=10,
+        activation_function="relu",
+        regularization=None,
+        reg_param=0.0,
+    ):
         super().__init__()
         self.hidden_sizes = hidden_sizes
         self.regularization = regularization
@@ -46,10 +55,10 @@ class Net(nn.Module):
 
         self.lst = nn.ModuleList()
         self.lst.append(nn.Linear(input_dim, hidden_sizes[0]))
-        
+
         for i in range(1, len(hidden_sizes)):
-            self.lst.append(nn.Linear(hidden_sizes[i-1], hidden_sizes[i]))
-            
+            self.lst.append(nn.Linear(hidden_sizes[i - 1], hidden_sizes[i]))
+
         self.lst.append(nn.Linear(hidden_sizes[-1], num_classes))
 
         if activation_function == "relu":
@@ -71,7 +80,7 @@ class Net(nn.Module):
             z = self.activation_function(z)
 
             if self.regularization == "dropout":
-                z = self.dropouts[i-1](z)
+                z = self.dropouts[i - 1](z)
 
             z = self.lst[i](z)
         return z

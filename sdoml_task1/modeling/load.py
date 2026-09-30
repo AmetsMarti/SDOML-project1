@@ -1,6 +1,10 @@
 import pickle
-from datasets import load_dataset, Audio
+
+from datasets import Audio, load_dataset
+
 from sdoml_task1.config import PROCESSED_DATA_DIR
+from sdoml_task1.features import build_feature_dataset
+
 
 def load_features():
     """Load the MFCC features, computing and caching them if needed.
