@@ -36,6 +36,6 @@ RUN .venv/bin/jupyter nbconvert --to script --output gradio_app --output-dir /ap
 EXPOSE 7860
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=120s --retries=3 \
-    CMD [".venv/bin/python", "-c", "import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:7860/', timeout=5).status == 200 else 1)"]
+    CMD [".venv/bin/python", "-c", "import sys, urllib.request; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:7861/', timeout=5).status == 200 else 1)"]
 
 CMD [".venv/bin/python", "gradio_app.py"]
