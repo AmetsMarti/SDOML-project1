@@ -12,7 +12,9 @@ ModelLoader
 """
 
 from pathlib import Path
+import pickle
 import re
+import warnings
 
 import librosa
 import numpy as np
@@ -43,10 +45,20 @@ class ModelLoader:
         Device to run the forward pass on. Defaults to CPU so the loader also
         works on machines without CUDA.
 
+    Attributes
+    ----------
+    is_trained : bool
+        ``False`` when no checkpoint was found and the network was built with
+        random weights. The UI uses it to warn that predictions are meaningless.
+    checkpoint : pathlib.Path or None
+        File the weights were read from, or ``None`` when a ``model`` was
+        passed in or no checkpoint exists.
+
     Raises
     ------
     FileNotFoundError
-        If the requested checkpoint does not exist.
+        If an explicit ``run_id`` does not exist. Without ``run_id`` a missing
+        checkpoint is not an error: the loader falls back to random weights.
     ValueError
         If the checkpoint does not describe a network :class:`Net` can rebuild.
     """
@@ -58,10 +70,29 @@ class ModelLoader:
         device: str | torch.device = "cpu",
     ) -> None:
         self.device = torch.device(device)
+        self.checkpoint: Path | None = None
+        self.is_trained = model is not None
+
         if model is None:
-            checkpoint = self._resolve_checkpoint(run_id)
-            state_dict = torch.load(checkpoint, map_location="cpu", weights_only=True)
-            model = self._build_model(state_dict, checkpoint)
+            try:
+                checkpoint = self._resolve_checkpoint(run_id)
+                state_dict = torch.load(checkpoint, map_location="cpu", weights_only=True)
+                model = self._build_model(state_dict, checkpoint)
+            except FileNotFoundError:
+                # Without an explicit run_id a missing checkpoint is not fatal:
+                # the interface must still start, so we fall back to Net() below.
+                if run_id is not None:
+                    raise
+                checkpoint = None
+            except (OSError, EOFError, ValueError, RuntimeError, pickle.UnpicklingError) as error:
+                warnings.warn(f"{checkpoint} is unusable ({error}); starting untrained.")
+                checkpoint = None
+
+            if checkpoint is None:
+                model = Net()  # random weights: nothing has been trained yet
+            else:
+                self.checkpoint = checkpoint
+                self.is_trained = True
 
         self.model = model.to(self.device)
         self.model.eval()
@@ -230,7 +261,18 @@ class ModelLoader:
         -------
         numpy.ndarray
             Probability vector of shape ``(10,)``.
+
+        Raises
+        ------
+        RuntimeError
+            If no trained model is loaded: with random weights the numbers
+            would look like predictions without meaning anything.
         """
+        if not self.is_trained:
+            raise RuntimeError(
+                "No trained model is loaded: train a model and save it with"
+                " sdoml_task1.modeling.train.save_run() first."
+            )
         audio_array, sample_rate = librosa.load(audio_path, sr=None, mono=True)
         features = extract_features(audio_array, sample_rate)
         X = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
