@@ -23,6 +23,7 @@ dependencies = [
     "soundfile>=0.14,<0.15",
     "ipykernel>=7.3,<8",
     "seaborn>=0.13.2,<0.14",
+    "plotly",
     "matplotlib>=3.11.1,<4",
     "jupyterlab>=4.6.3,<5",
     "torchcodec>=0.16.0,<0.17",
