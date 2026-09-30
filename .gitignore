@@ -6,7 +6,6 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-assets/
 
 .ipynb_checkpoints/
 
@@ -15,9 +14,9 @@ data/processed/*.csv
 data/processed/*.parquet
 data/processed/*
 data/interim/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/interim/.gitkeep
+data/raw/.gitkeep
+data/processed/.gitkeep
+data/interim/.gitkeep
 Report.typ
 models/*
 models/*
