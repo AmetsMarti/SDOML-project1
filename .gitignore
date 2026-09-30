@@ -7,6 +7,12 @@ __pycache__/
 dist/
 build/
 
+assets/**
+!assets/model_analysis/
+!assets/model_analysis/.gitkeep
+!assets/dataset_analysis/
+!assets/dataset_analysis/.gitkeep
+
 .ipynb_checkpoints/
 
 data/raw/*
