@@ -15,13 +15,10 @@ from pathlib import Path
 import pickle
 import warnings
 
-import librosa
 import numpy as np
 import torch
-import torch.nn.functional as F
 
 from sdoml_task1.config import MODEL_DIR
-from sdoml_task1.features import extract_features
 from sdoml_task1.modeling.model import Net
 
 class ModelLoader:
@@ -30,8 +27,7 @@ class ModelLoader:
     Parameters
     ----------
     model : Net, optional
-        An already-built network. When omitted, the checkpoint resolved by
-        ``run_id`` is loaded instead.
+        An already-built network. When omitted, ``models/model.pt`` is loaded.
     device : str or torch.device, optional
         Device to run the forward pass on. Defaults to CPU so the loader also
         works on machines without CUDA.
@@ -51,7 +47,7 @@ class ModelLoader:
         If ``models/model.pt`` does not exist. The loader falls back to random
         weights when no model has been trained yet.
     ValueError
-        If the checkpoint does not describe a network :class:`Net` can rebuild.
+        If the checkpoint does not contain model weights and configuration.
     """
 
     def __init__(
@@ -67,7 +63,19 @@ class ModelLoader:
             try:
                 checkpoint = self._resolve_checkpoint()
                 payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
-                model = self._build_model(payload, checkpoint)
+                if not isinstance(payload, dict) or not {"state_dict", "config"} <= payload.keys():
+                    raise ValueError(f"{checkpoint} is not a latest-model checkpoint")
+
+                config = payload["config"]
+                model = Net(
+                    input_dim=config["input_dim"],
+                    hidden_sizes=tuple(config["hidden_sizes"]),
+                    num_classes=config.get("num_classes", 10),
+                    activation_function=config["activation_function"],
+                    regularization=config["regularization"],
+                    reg_param=config["reg_param"],
+                )
+                model.load_state_dict(payload["state_dict"])
             except FileNotFoundError:
                 checkpoint = None
             except (OSError, EOFError, ValueError, RuntimeError, pickle.UnpicklingError) as error:
@@ -105,42 +113,6 @@ class ModelLoader:
             )
         return checkpoint
 
-    @staticmethod
-    def _build_model(payload: dict, checkpoint: Path) -> Net:
-        """Build a :class:`Net` from a self-describing checkpoint.
-
-        Parameters
-        ----------
-        payload : dict
-            Checkpoint containing ``state_dict`` and ``config`` entries.
-        checkpoint : pathlib.Path
-            Only used to point at the offending file in error messages.
-
-        Returns
-        -------
-        Net
-            A network matching the checkpoint, weights already loaded.
-
-        Raises
-        ------
-        ValueError
-            If the checkpoint does not contain the required entries.
-        """
-        if not isinstance(payload, dict) or not {"state_dict", "config"} <= payload.keys():
-            raise ValueError(f"{checkpoint} is not a latest-model checkpoint")
-
-        config = payload["config"]
-        model = Net(
-            input_dim=config["input_dim"],
-            hidden_sizes=tuple(config["hidden_sizes"]),
-            num_classes=config.get("num_classes", 10),
-            activation_function=config["activation_function"],
-            regularization=config["regularization"],
-            reg_param=config["reg_param"],
-        )
-        model.load_state_dict(payload["state_dict"])
-        return model
-
     @torch.no_grad()
     def _predict(self, X: torch.Tensor) -> np.ndarray:
         """Predict class probabilities from a MFCC feature vector.
@@ -158,7 +130,7 @@ class ModelLoader:
         """
         self.model.eval()
         logits = self.model(X.to(self.device))
-        probs = F.softmax(logits, dim=-1).cpu().numpy()
+        probs = torch.softmax(logits, dim=-1).cpu().numpy()
         return probs[0] if probs.shape[0] == 1 else probs
 
     def make_prediction(self, audio_path: str) -> np.ndarray:
@@ -191,6 +163,9 @@ class ModelLoader:
                 "No trained model is loaded: train a model and save it with"
                 " sdoml_task1.modeling.train.save_run() first."
             )
+        from sdoml_task1.features import extract_features
+        import librosa
+
         audio_array, sample_rate = librosa.load(audio_path, sr=None, mono=True)
         features = extract_features(audio_array, sample_rate)
         X = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
