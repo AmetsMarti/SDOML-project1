@@ -14,6 +14,7 @@ assets/**
 !assets/dataset_analysis/.gitkeep
 
 .ipynb_checkpoints/
+.ruff_cache/
 
 data/raw/*
 data/processed/*.csv
@@ -30,6 +31,9 @@ models/*
 models/*
 runs/
 !models/.gitkeep
+
+# Compiled report (regenerated from Report.typ, e.g. with typst)
+Report.pdf
 
 # Environment variables
 .env
