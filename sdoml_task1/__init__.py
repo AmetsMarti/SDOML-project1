@@ -33,15 +33,20 @@ There are four jupyter notebooks:
 
 The notebooks are there for simplicity, but the detailed functions can be found in `sdoml_task1/`.
 
-Additionally, there is a Docker image available to test the gradio app (around 7GB):
+Additionally, there is a Docker image available to test the gradio app. The image is rather large (around 7GB), so keep that in mind when downloading it:
 
 ```bash
 # Download the image
-docker pull alvarocrespo02/sdoml-demo
-
-# Run the app
-docker run -p 7860:7860 alvarocrespo02/sdoml-demo
+docker pull ametslortek/sdoml-demo:latest
 ```
+
+Then to run the project, we also need to expose the containers network, so may vary between OSes.
+
+```bash
+docker run --network=host ametslortek/sdoml-demo:latest
+```
+
+With this, the interactive UI will run in localhost:7861
 
  Project Organization
 --------------------

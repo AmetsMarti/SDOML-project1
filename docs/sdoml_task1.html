@@ -90,16 +90,22 @@ For a more detailed description of all the project's requirements, please check 
 
 <p>The notebooks are there for simplicity, but the detailed functions can be found in <code>sdoml_task1/</code>.</p>
 
-<p>Additionally, there is a Docker image available to test the gradio app (around 7GB):</p>
+<p>Additionally, there is a Docker image available to test the gradio app. The image is rather large (around 7GB), so keep that in mind when downloading it:</p>
 
 <div class="pdoc-code codehilite">
 <pre><span></span><code><span class="c1"># Download the image</span>
-docker<span class="w"> </span>pull<span class="w"> </span>alvarocrespo02/sdoml-demo
-
-<span class="c1"># Run the app</span>
-docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </span><span class="m">7860</span>:7860<span class="w"> </span>alvarocrespo02/sdoml-demo
+docker<span class="w"> </span>pull<span class="w"> </span>ametslortek/sdoml-demo:latest
 </code></pre>
 </div>
+
+<p>Then to run the project, we also need to expose the containers network, so may vary between OSes.</p>
+
+<div class="pdoc-code codehilite">
+<pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--network<span class="o">=</span>host<span class="w"> </span>ametslortek/sdoml-demo:latest
+</code></pre>
+</div>
+
+<p>With this, the interactive UI will run in localhost:7861</p>
 
 <h2 id="project-organization"> Project Organization</h2>
 
@@ -168,44 +174,49 @@ docker<span class="w"> </span>run<span class="w"> </span>-p<span class="w"> </sp
 </span><span id="L-33"><a href="#L-33"><span class="linenos">33</span></a>
 </span><span id="L-34"><a href="#L-34"><span class="linenos">34</span></a><span class="sd">The notebooks are there for simplicity, but the detailed functions can be found in `sdoml_task1/`.</span>
 </span><span id="L-35"><a href="#L-35"><span class="linenos">35</span></a>
-</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="sd">Additionally, there is a Docker image available to test the gradio app (around 7GB):</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos">36</span></a><span class="sd">Additionally, there is a Docker image available to test the gradio app. The image is rather large (around 7GB), so keep that in mind when downloading it:</span>
 </span><span id="L-37"><a href="#L-37"><span class="linenos">37</span></a>
 </span><span id="L-38"><a href="#L-38"><span class="linenos">38</span></a><span class="sd">```bash</span>
 </span><span id="L-39"><a href="#L-39"><span class="linenos">39</span></a><span class="sd"># Download the image</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a><span class="sd">docker pull alvarocrespo02/sdoml-demo</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a>
-</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a><span class="sd"># Run the app</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a><span class="sd">docker run -p 7860:7860 alvarocrespo02/sdoml-demo</span>
-</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a><span class="sd">```</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a>
-</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a><span class="sd"> Project Organization</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a><span class="sd">--------------------</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a><span class="sd">The project is organized using the [cookie cutter template](https://cookiecutter-data-science.drivendata.org/).</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a>
-</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a><span class="sd">    ├── LICENSE</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a><span class="sd">    ├── Makefile</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a><span class="sd">    ├── README.md</span>
-</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a><span class="sd">    ├── data/</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a><span class="sd">    ├── docs/</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a><span class="sd">    ├── models/</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a><span class="sd">    ├── notebooks/</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a><span class="sd">    ├── pyproject.toml</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a><span class="sd">    ├── references/</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a><span class="sd">    ├── reports/</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a><span class="sd">    ├── requirements.txt</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a><span class="sd">    ├── setup.cfg</span>
-</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a><span class="sd">    └── sdoml_task1/</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a><span class="sd">        ├── __init__.py</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a><span class="sd">        ├── config.py</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a><span class="sd">        ├── dataset.py</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a><span class="sd">        ├── features.py</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a><span class="sd">        ├── modeling/</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a><span class="sd">        └── plots.py</span>
-</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a>
-</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a><span class="sd">*Made by: Amets Martiarena, Teva Philippe, Alvaro Crespo (GPL-3.0 license)*</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a><span class="sd">"""</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a>
-</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"config"</span><span class="p">,</span> <span class="s2">"dataset"</span><span class="p">,</span> <span class="s2">"features"</span><span class="p">,</span> <span class="s2">"plots"</span><span class="p">,</span> <span class="s2">"modeling"</span><span class="p">]</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos">40</span></a><span class="sd">docker pull ametslortek/sdoml-demo:latest</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos">41</span></a><span class="sd">```</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos">42</span></a>
+</span><span id="L-43"><a href="#L-43"><span class="linenos">43</span></a><span class="sd">Then to run the project, we also need to expose the containers network, so may vary between OSes.</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos">44</span></a>
+</span><span id="L-45"><a href="#L-45"><span class="linenos">45</span></a><span class="sd">```bash</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos">46</span></a><span class="sd">docker run --network=host ametslortek/sdoml-demo:latest</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos">47</span></a><span class="sd">```</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos">48</span></a>
+</span><span id="L-49"><a href="#L-49"><span class="linenos">49</span></a><span class="sd">With this, the interactive UI will run in localhost:7861</span>
+</span><span id="L-50"><a href="#L-50"><span class="linenos">50</span></a>
+</span><span id="L-51"><a href="#L-51"><span class="linenos">51</span></a><span class="sd"> Project Organization</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos">52</span></a><span class="sd">--------------------</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos">53</span></a><span class="sd">The project is organized using the [cookie cutter template](https://cookiecutter-data-science.drivendata.org/).</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos">54</span></a>
+</span><span id="L-55"><a href="#L-55"><span class="linenos">55</span></a><span class="sd">    ├── LICENSE</span>
+</span><span id="L-56"><a href="#L-56"><span class="linenos">56</span></a><span class="sd">    ├── Makefile</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos">57</span></a><span class="sd">    ├── README.md</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos">58</span></a><span class="sd">    ├── data/</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos">59</span></a><span class="sd">    ├── docs/</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos">60</span></a><span class="sd">    ├── models/</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos">61</span></a><span class="sd">    ├── notebooks/</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos">62</span></a><span class="sd">    ├── pyproject.toml</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos">63</span></a><span class="sd">    ├── references/</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos">64</span></a><span class="sd">    ├── reports/</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos">65</span></a><span class="sd">    ├── requirements.txt</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos">66</span></a><span class="sd">    ├── setup.cfg</span>
+</span><span id="L-67"><a href="#L-67"><span class="linenos">67</span></a><span class="sd">    └── sdoml_task1/</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos">68</span></a><span class="sd">        ├── __init__.py</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos">69</span></a><span class="sd">        ├── config.py</span>
+</span><span id="L-70"><a href="#L-70"><span class="linenos">70</span></a><span class="sd">        ├── dataset.py</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos">71</span></a><span class="sd">        ├── features.py</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos">72</span></a><span class="sd">        ├── modeling/</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos">73</span></a><span class="sd">        └── plots.py</span>
+</span><span id="L-74"><a href="#L-74"><span class="linenos">74</span></a>
+</span><span id="L-75"><a href="#L-75"><span class="linenos">75</span></a><span class="sd">*Made by: Amets Martiarena, Teva Philippe, Alvaro Crespo (GPL-3.0 license)*</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos">76</span></a><span class="sd">"""</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos">77</span></a>
+</span><span id="L-78"><a href="#L-78"><span class="linenos">78</span></a><span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"config"</span><span class="p">,</span> <span class="s2">"dataset"</span><span class="p">,</span> <span class="s2">"features"</span><span class="p">,</span> <span class="s2">"plots"</span><span class="p">,</span> <span class="s2">"modeling"</span><span class="p">]</span>
 </span></pre></div>
 
 

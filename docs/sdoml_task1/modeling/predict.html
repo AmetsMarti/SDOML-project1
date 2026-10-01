@@ -40,12 +40,6 @@
                                 <a class="variable" href="#ModelLoader.device">device</a>
                         </li>
                         <li>
-                                <a class="variable" href="#ModelLoader.checkpoint">checkpoint</a>
-                        </li>
-                        <li>
-                                <a class="variable" href="#ModelLoader.is_trained">is_trained</a>
-                        </li>
-                        <li>
                                 <a class="variable" href="#ModelLoader.model">model</a>
                         </li>
                         <li>
@@ -100,13 +94,13 @@ pushed through the checkpoint as a batch of one.</p>
 </span><span id="L-12"><a href="#L-12"><span class="linenos"> 12</span></a><span class="sd">"""</span>
 </span><span id="L-13"><a href="#L-13"><span class="linenos"> 13</span></a>
 </span><span id="L-14"><a href="#L-14"><span class="linenos"> 14</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">pickle</span>
-</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
-</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a>
-</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
-</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a>
-</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">sdoml_task1.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">MODEL_DIR</span>
+</span><span id="L-15"><a href="#L-15"><span class="linenos"> 15</span></a>
+</span><span id="L-16"><a href="#L-16"><span class="linenos"> 16</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
+</span><span id="L-17"><a href="#L-17"><span class="linenos"> 17</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</span><span id="L-18"><a href="#L-18"><span class="linenos"> 18</span></a><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+</span><span id="L-19"><a href="#L-19"><span class="linenos"> 19</span></a>
+</span><span id="L-20"><a href="#L-20"><span class="linenos"> 20</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">sdoml_task1.config</span><span class="w"> </span><span class="kn">import</span> <span class="n">MODEL_DIR</span>
+</span><span id="L-21"><a href="#L-21"><span class="linenos"> 21</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">sdoml_task1.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_features</span>
 </span><span id="L-22"><a href="#L-22"><span class="linenos"> 22</span></a><span class="kn">from</span><span class="w"> </span><span class="nn">sdoml_task1.modeling.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Net</span>
 </span><span id="L-23"><a href="#L-23"><span class="linenos"> 23</span></a>
 </span><span id="L-24"><a href="#L-24"><span class="linenos"> 24</span></a><span class="k">class</span><span class="w"> </span><span class="nc">ModelLoader</span><span class="p">:</span>
@@ -120,144 +114,109 @@ pushed through the checkpoint as a batch of one.</p>
 </span><span id="L-32"><a href="#L-32"><span class="linenos"> 32</span></a><span class="sd">        Device to run the forward pass on. Defaults to CPU so the loader also</span>
 </span><span id="L-33"><a href="#L-33"><span class="linenos"> 33</span></a><span class="sd">        works on machines without CUDA.</span>
 </span><span id="L-34"><a href="#L-34"><span class="linenos"> 34</span></a>
-</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">    Attributes</span>
-</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">    ----------</span>
-</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="sd">    is_trained : bool</span>
-</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="sd">        ``False`` when no checkpoint was found and the network was built with</span>
-</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="sd">        random weights. The UI uses it to warn that predictions are meaningless.</span>
-</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="sd">    checkpoint : pathlib.Path or None</span>
-</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">        File the weights were read from, or ``None`` when a ``model`` was</span>
-</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a><span class="sd">        passed in or no checkpoint exists.</span>
-</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>
-</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a><span class="sd">    Raises</span>
-</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a><span class="sd">    ------</span>
-</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a><span class="sd">    FileNotFoundError</span>
-</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a><span class="sd">        If ``models/model.pt`` does not exist. The loader falls back to random</span>
-</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a><span class="sd">        weights when no model has been trained yet.</span>
-</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a><span class="sd">    ValueError</span>
-</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a><span class="sd">        If the checkpoint does not contain model weights and configuration.</span>
-</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a><span class="sd">    """</span>
-</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>
-</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>        <span class="n">model</span><span class="p">:</span> <span class="n">Net</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="s2">"cpu"</span><span class="p">,</span>
-</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span> <span class="o">=</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>
-</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>            <span class="k">try</span><span class="p">:</span>
-</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>                <span class="n">checkpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_checkpoint</span><span class="p">()</span>
-</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>                <span class="n">payload</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">{</span><span class="s2">"state_dict"</span><span class="p">,</span> <span class="s2">"config"</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">payload</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2"> is not a latest-model checkpoint"</span><span class="p">)</span>
-</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>
-</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>                <span class="n">config</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"config"</span><span class="p">]</span>
-</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>                <span class="n">model</span> <span class="o">=</span> <span class="n">Net</span><span class="p">(</span>
-</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>                    <span class="n">input_dim</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"input_dim"</span><span class="p">],</span>
-</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a>                    <span class="n">hidden_sizes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">"hidden_sizes"</span><span class="p">]),</span>
-</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>                    <span class="n">num_classes</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"num_classes"</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
-</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a>                    <span class="n">activation_function</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"activation_function"</span><span class="p">],</span>
-</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a>                    <span class="n">regularization</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"regularization"</span><span class="p">],</span>
-</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a>                    <span class="n">reg_param</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"reg_param"</span><span class="p">],</span>
-</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a>                <span class="p">)</span>
-</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>                <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">"state_dict"</span><span class="p">])</span>
-</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a>            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a>                <span class="n">checkpoint</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a>            <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">,</span> <span class="n">pickle</span><span class="o">.</span><span class="n">UnpicklingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a>                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2"> is unusable (</span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">); starting untrained."</span><span class="p">)</span>
-</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a>                <span class="n">checkpoint</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>
-</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>            <span class="k">if</span> <span class="n">checkpoint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>                <span class="n">model</span> <span class="o">=</span> <span class="n">Net</span><span class="p">()</span>  <span class="c1"># random weights: nothing has been trained yet</span>
-</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>            <span class="k">else</span><span class="p">:</span>
-</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="n">checkpoint</span>
-</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>
-</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>
-</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a>    <span class="nd">@staticmethod</span>
-</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_checkpoint</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a><span class="w">        </span><span class="sd">"""Return the latest model checkpoint.</span>
-</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a>
-</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a><span class="sd">        Returns</span>
-</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a><span class="sd">        -------</span>
-</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a><span class="sd">        pathlib.Path</span>
-</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a><span class="sd">            Path to ``models/model.pt``.</span>
-</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a>
-</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a><span class="sd">        Raises</span>
-</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="sd">        ------</span>
-</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="sd">        FileNotFoundError</span>
-</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">            If the latest model has not been saved yet.</span>
-</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a><span class="sd">        """</span>
-</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">MODEL_DIR</span> <span class="o">/</span> <span class="s2">"model.pt"</span>
-</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">checkpoint</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>                <span class="sa">f</span><span class="s2">"No latest model found at </span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2">. Train a model first and save it with"</span>
-</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>                <span class="s2">" sdoml_task1.modeling.train.save_run()."</span>
-</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a>            <span class="p">)</span>
-</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>        <span class="k">return</span> <span class="n">checkpoint</span>
-</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a>
-</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a>    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
-</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="w">        </span><span class="sd">"""Predict class probabilities from a MFCC feature vector.</span>
+</span><span id="L-35"><a href="#L-35"><span class="linenos"> 35</span></a><span class="sd">    Raises</span>
+</span><span id="L-36"><a href="#L-36"><span class="linenos"> 36</span></a><span class="sd">    ------</span>
+</span><span id="L-37"><a href="#L-37"><span class="linenos"> 37</span></a><span class="sd">    FileNotFoundError</span>
+</span><span id="L-38"><a href="#L-38"><span class="linenos"> 38</span></a><span class="sd">        If ``models/model.pt`` does not exist.</span>
+</span><span id="L-39"><a href="#L-39"><span class="linenos"> 39</span></a><span class="sd">    ValueError</span>
+</span><span id="L-40"><a href="#L-40"><span class="linenos"> 40</span></a><span class="sd">        If the checkpoint does not contain model weights and configuration.</span>
+</span><span id="L-41"><a href="#L-41"><span class="linenos"> 41</span></a><span class="sd">    """</span>
+</span><span id="L-42"><a href="#L-42"><span class="linenos"> 42</span></a>
+</span><span id="L-43"><a href="#L-43"><span class="linenos"> 43</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="L-44"><a href="#L-44"><span class="linenos"> 44</span></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="L-45"><a href="#L-45"><span class="linenos"> 45</span></a>        <span class="n">model</span><span class="p">:</span> <span class="n">Net</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="L-46"><a href="#L-46"><span class="linenos"> 46</span></a>        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="s2">"cpu"</span><span class="p">,</span>
+</span><span id="L-47"><a href="#L-47"><span class="linenos"> 47</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-48"><a href="#L-48"><span class="linenos"> 48</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="L-49"><a href="#L-49"><span class="linenos"> 49</span></a>
+</span><span id="L-50"><a href="#L-50"><span class="linenos"> 50</span></a>        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="L-51"><a href="#L-51"><span class="linenos"> 51</span></a>            <span class="n">checkpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_checkpoint</span><span class="p">()</span>
+</span><span id="L-52"><a href="#L-52"><span class="linenos"> 52</span></a>            <span class="n">payload</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="L-53"><a href="#L-53"><span class="linenos"> 53</span></a>            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">{</span><span class="s2">"state_dict"</span><span class="p">,</span> <span class="s2">"config"</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">payload</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+</span><span id="L-54"><a href="#L-54"><span class="linenos"> 54</span></a>                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2"> is not a latest-model checkpoint"</span><span class="p">)</span>
+</span><span id="L-55"><a href="#L-55"><span class="linenos"> 55</span></a>
+</span><span id="L-56"><a href="#L-56"><span class="linenos"> 56</span></a>            <span class="n">config</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"config"</span><span class="p">]</span>
+</span><span id="L-57"><a href="#L-57"><span class="linenos"> 57</span></a>            <span class="n">model</span> <span class="o">=</span> <span class="n">Net</span><span class="p">(</span>
+</span><span id="L-58"><a href="#L-58"><span class="linenos"> 58</span></a>                <span class="n">input_dim</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"input_dim"</span><span class="p">],</span>
+</span><span id="L-59"><a href="#L-59"><span class="linenos"> 59</span></a>                <span class="n">hidden_sizes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">"hidden_sizes"</span><span class="p">]),</span>
+</span><span id="L-60"><a href="#L-60"><span class="linenos"> 60</span></a>                <span class="n">num_classes</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"num_classes"</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+</span><span id="L-61"><a href="#L-61"><span class="linenos"> 61</span></a>                <span class="n">activation_function</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"activation_function"</span><span class="p">],</span>
+</span><span id="L-62"><a href="#L-62"><span class="linenos"> 62</span></a>                <span class="n">regularization</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"regularization"</span><span class="p">],</span>
+</span><span id="L-63"><a href="#L-63"><span class="linenos"> 63</span></a>                <span class="n">reg_param</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"reg_param"</span><span class="p">],</span>
+</span><span id="L-64"><a href="#L-64"><span class="linenos"> 64</span></a>            <span class="p">)</span>
+</span><span id="L-65"><a href="#L-65"><span class="linenos"> 65</span></a>            <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">"state_dict"</span><span class="p">])</span>
+</span><span id="L-66"><a href="#L-66"><span class="linenos"> 66</span></a>
+</span><span id="L-67"><a href="#L-67"><span class="linenos"> 67</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+</span><span id="L-68"><a href="#L-68"><span class="linenos"> 68</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="L-69"><a href="#L-69"><span class="linenos"> 69</span></a>
+</span><span id="L-70"><a href="#L-70"><span class="linenos"> 70</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="L-71"><a href="#L-71"><span class="linenos"> 71</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_checkpoint</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+</span><span id="L-72"><a href="#L-72"><span class="linenos"> 72</span></a><span class="w">        </span><span class="sd">"""Return the latest model checkpoint.</span>
+</span><span id="L-73"><a href="#L-73"><span class="linenos"> 73</span></a>
+</span><span id="L-74"><a href="#L-74"><span class="linenos"> 74</span></a><span class="sd">        Returns</span>
+</span><span id="L-75"><a href="#L-75"><span class="linenos"> 75</span></a><span class="sd">        -------</span>
+</span><span id="L-76"><a href="#L-76"><span class="linenos"> 76</span></a><span class="sd">        pathlib.Path</span>
+</span><span id="L-77"><a href="#L-77"><span class="linenos"> 77</span></a><span class="sd">            Path to ``models/model.pt``.</span>
+</span><span id="L-78"><a href="#L-78"><span class="linenos"> 78</span></a>
+</span><span id="L-79"><a href="#L-79"><span class="linenos"> 79</span></a><span class="sd">        Raises</span>
+</span><span id="L-80"><a href="#L-80"><span class="linenos"> 80</span></a><span class="sd">        ------</span>
+</span><span id="L-81"><a href="#L-81"><span class="linenos"> 81</span></a><span class="sd">        FileNotFoundError</span>
+</span><span id="L-82"><a href="#L-82"><span class="linenos"> 82</span></a><span class="sd">            If the latest model has not been saved yet.</span>
+</span><span id="L-83"><a href="#L-83"><span class="linenos"> 83</span></a><span class="sd">        """</span>
+</span><span id="L-84"><a href="#L-84"><span class="linenos"> 84</span></a>        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">MODEL_DIR</span> <span class="o">/</span> <span class="s2">"model.pt"</span>
+</span><span id="L-85"><a href="#L-85"><span class="linenos"> 85</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">checkpoint</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+</span><span id="L-86"><a href="#L-86"><span class="linenos"> 86</span></a>            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+</span><span id="L-87"><a href="#L-87"><span class="linenos"> 87</span></a>                <span class="sa">f</span><span class="s2">"No latest model found at </span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2">. Train a model first and save it with"</span>
+</span><span id="L-88"><a href="#L-88"><span class="linenos"> 88</span></a>                <span class="s2">" sdoml_task1.modeling.train.save_run()."</span>
+</span><span id="L-89"><a href="#L-89"><span class="linenos"> 89</span></a>            <span class="p">)</span>
+</span><span id="L-90"><a href="#L-90"><span class="linenos"> 90</span></a>        <span class="k">return</span> <span class="n">checkpoint</span>
+</span><span id="L-91"><a href="#L-91"><span class="linenos"> 91</span></a>
+</span><span id="L-92"><a href="#L-92"><span class="linenos"> 92</span></a>    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+</span><span id="L-93"><a href="#L-93"><span class="linenos"> 93</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="L-94"><a href="#L-94"><span class="linenos"> 94</span></a><span class="w">        </span><span class="sd">"""Predict class probabilities from a MFCC feature vector.</span>
+</span><span id="L-95"><a href="#L-95"><span class="linenos"> 95</span></a>
+</span><span id="L-96"><a href="#L-96"><span class="linenos"> 96</span></a><span class="sd">        Parameters</span>
+</span><span id="L-97"><a href="#L-97"><span class="linenos"> 97</span></a><span class="sd">        ----------</span>
+</span><span id="L-98"><a href="#L-98"><span class="linenos"> 98</span></a><span class="sd">        X : torch.Tensor</span>
+</span><span id="L-99"><a href="#L-99"><span class="linenos"> 99</span></a><span class="sd">            Feature tensor of shape ``(batch_size, 26)``.</span>
+</span><span id="L-100"><a href="#L-100"><span class="linenos">100</span></a>
+</span><span id="L-101"><a href="#L-101"><span class="linenos">101</span></a><span class="sd">        Returns</span>
+</span><span id="L-102"><a href="#L-102"><span class="linenos">102</span></a><span class="sd">        -------</span>
+</span><span id="L-103"><a href="#L-103"><span class="linenos">103</span></a><span class="sd">        numpy.ndarray</span>
+</span><span id="L-104"><a href="#L-104"><span class="linenos">104</span></a><span class="sd">            Probabilities of shape ``(10,)`` for a single sample, or</span>
+</span><span id="L-105"><a href="#L-105"><span class="linenos">105</span></a><span class="sd">            ``(batch_size, 10)`` when several samples are passed.</span>
+</span><span id="L-106"><a href="#L-106"><span class="linenos">106</span></a><span class="sd">        """</span>
+</span><span id="L-107"><a href="#L-107"><span class="linenos">107</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="L-108"><a href="#L-108"><span class="linenos">108</span></a>        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
+</span><span id="L-109"><a href="#L-109"><span class="linenos">109</span></a>        <span class="n">probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+</span><span id="L-110"><a href="#L-110"><span class="linenos">110</span></a>        <span class="k">return</span> <span class="n">probs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">probs</span>
+</span><span id="L-111"><a href="#L-111"><span class="linenos">111</span></a>
+</span><span id="L-112"><a href="#L-112"><span class="linenos">112</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">make_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="L-113"><a href="#L-113"><span class="linenos">113</span></a><span class="w">        </span><span class="sd">"""Turn an audio file into digit probabilities.</span>
+</span><span id="L-114"><a href="#L-114"><span class="linenos">114</span></a>
+</span><span id="L-115"><a href="#L-115"><span class="linenos">115</span></a><span class="sd">        - Loads the file at its native sample rate, mixed down to mono</span>
+</span><span id="L-116"><a href="#L-116"><span class="linenos">116</span></a><span class="sd">        - Extracts the 26 MFCC features used in training</span>
+</span><span id="L-117"><a href="#L-117"><span class="linenos">117</span></a><span class="sd">        - Converts them into a ``(1, 26)`` float32 tensor</span>
+</span><span id="L-118"><a href="#L-118"><span class="linenos">118</span></a><span class="sd">        - Returns the probabilities of the 10 digits</span>
 </span><span id="L-119"><a href="#L-119"><span class="linenos">119</span></a>
 </span><span id="L-120"><a href="#L-120"><span class="linenos">120</span></a><span class="sd">        Parameters</span>
 </span><span id="L-121"><a href="#L-121"><span class="linenos">121</span></a><span class="sd">        ----------</span>
-</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">        X : torch.Tensor</span>
-</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a><span class="sd">            Feature tensor of shape ``(batch_size, 26)``.</span>
-</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a>
-</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a><span class="sd">        Returns</span>
-</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a><span class="sd">        -------</span>
-</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a><span class="sd">        numpy.ndarray</span>
-</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a><span class="sd">            Probabilities of shape ``(10,)`` for a single sample, or</span>
-</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a><span class="sd">            ``(batch_size, 10)`` when several samples are passed.</span>
-</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a><span class="sd">        """</span>
-</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a>        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
-</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a>        <span class="n">probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>        <span class="k">return</span> <span class="n">probs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">probs</span>
-</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>
-</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">make_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a><span class="w">        </span><span class="sd">"""Turn an audio file into digit probabilities.</span>
-</span><span id="L-138"><a href="#L-138"><span class="linenos">138</span></a>
-</span><span id="L-139"><a href="#L-139"><span class="linenos">139</span></a><span class="sd">        - Loads the file at its native sample rate, mixed down to mono</span>
-</span><span id="L-140"><a href="#L-140"><span class="linenos">140</span></a><span class="sd">        - Extracts the 26 MFCC features used in training</span>
-</span><span id="L-141"><a href="#L-141"><span class="linenos">141</span></a><span class="sd">        - Converts them into a ``(1, 26)`` float32 tensor</span>
-</span><span id="L-142"><a href="#L-142"><span class="linenos">142</span></a><span class="sd">        - Returns the probabilities of the 10 digits</span>
-</span><span id="L-143"><a href="#L-143"><span class="linenos">143</span></a>
-</span><span id="L-144"><a href="#L-144"><span class="linenos">144</span></a><span class="sd">        Parameters</span>
-</span><span id="L-145"><a href="#L-145"><span class="linenos">145</span></a><span class="sd">        ----------</span>
-</span><span id="L-146"><a href="#L-146"><span class="linenos">146</span></a><span class="sd">        audio_path : str</span>
-</span><span id="L-147"><a href="#L-147"><span class="linenos">147</span></a><span class="sd">            Path to the audio file, e.g. the filepath a ``gr.Audio`` component</span>
-</span><span id="L-148"><a href="#L-148"><span class="linenos">148</span></a><span class="sd">            hands to its callback.</span>
-</span><span id="L-149"><a href="#L-149"><span class="linenos">149</span></a>
-</span><span id="L-150"><a href="#L-150"><span class="linenos">150</span></a><span class="sd">        Returns</span>
-</span><span id="L-151"><a href="#L-151"><span class="linenos">151</span></a><span class="sd">        -------</span>
-</span><span id="L-152"><a href="#L-152"><span class="linenos">152</span></a><span class="sd">        numpy.ndarray</span>
-</span><span id="L-153"><a href="#L-153"><span class="linenos">153</span></a><span class="sd">            Probability vector of shape ``(10,)``.</span>
-</span><span id="L-154"><a href="#L-154"><span class="linenos">154</span></a>
-</span><span id="L-155"><a href="#L-155"><span class="linenos">155</span></a><span class="sd">        Raises</span>
-</span><span id="L-156"><a href="#L-156"><span class="linenos">156</span></a><span class="sd">        ------</span>
-</span><span id="L-157"><a href="#L-157"><span class="linenos">157</span></a><span class="sd">        RuntimeError</span>
-</span><span id="L-158"><a href="#L-158"><span class="linenos">158</span></a><span class="sd">            If no trained model is loaded: with random weights the numbers</span>
-</span><span id="L-159"><a href="#L-159"><span class="linenos">159</span></a><span class="sd">            would look like predictions without meaning anything.</span>
-</span><span id="L-160"><a href="#L-160"><span class="linenos">160</span></a><span class="sd">        """</span>
-</span><span id="L-161"><a href="#L-161"><span class="linenos">161</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span><span class="p">:</span>
-</span><span id="L-162"><a href="#L-162"><span class="linenos">162</span></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-</span><span id="L-163"><a href="#L-163"><span class="linenos">163</span></a>                <span class="s2">"No trained model is loaded: train a model and save it with"</span>
-</span><span id="L-164"><a href="#L-164"><span class="linenos">164</span></a>                <span class="s2">" sdoml_task1.modeling.train.save_run() first."</span>
-</span><span id="L-165"><a href="#L-165"><span class="linenos">165</span></a>            <span class="p">)</span>
-</span><span id="L-166"><a href="#L-166"><span class="linenos">166</span></a>        <span class="kn">from</span><span class="w"> </span><span class="nn">sdoml_task1.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_features</span>
-</span><span id="L-167"><a href="#L-167"><span class="linenos">167</span></a>        <span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
-</span><span id="L-168"><a href="#L-168"><span class="linenos">168</span></a>
-</span><span id="L-169"><a href="#L-169"><span class="linenos">169</span></a>        <span class="n">audio_array</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">audio_path</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="L-170"><a href="#L-170"><span class="linenos">170</span></a>        <span class="n">features</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span><span class="n">audio_array</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
-</span><span id="L-171"><a href="#L-171"><span class="linenos">171</span></a>        <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span id="L-172"><a href="#L-172"><span class="linenos">172</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</span><span id="L-122"><a href="#L-122"><span class="linenos">122</span></a><span class="sd">        audio_path : str</span>
+</span><span id="L-123"><a href="#L-123"><span class="linenos">123</span></a><span class="sd">            Path to the audio file, e.g. the filepath a ``gr.Audio`` component</span>
+</span><span id="L-124"><a href="#L-124"><span class="linenos">124</span></a><span class="sd">            hands to its callback.</span>
+</span><span id="L-125"><a href="#L-125"><span class="linenos">125</span></a>
+</span><span id="L-126"><a href="#L-126"><span class="linenos">126</span></a><span class="sd">        Returns</span>
+</span><span id="L-127"><a href="#L-127"><span class="linenos">127</span></a><span class="sd">        -------</span>
+</span><span id="L-128"><a href="#L-128"><span class="linenos">128</span></a><span class="sd">        numpy.ndarray</span>
+</span><span id="L-129"><a href="#L-129"><span class="linenos">129</span></a><span class="sd">            Probability vector of shape ``(10,)``.</span>
+</span><span id="L-130"><a href="#L-130"><span class="linenos">130</span></a>
+</span><span id="L-131"><a href="#L-131"><span class="linenos">131</span></a><span class="sd">        Raises</span>
+</span><span id="L-132"><a href="#L-132"><span class="linenos">132</span></a><span class="sd">        ------</span>
+</span><span id="L-133"><a href="#L-133"><span class="linenos">133</span></a><span class="sd">        """</span>
+</span><span id="L-134"><a href="#L-134"><span class="linenos">134</span></a>        <span class="n">audio_array</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">audio_path</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="L-135"><a href="#L-135"><span class="linenos">135</span></a>        <span class="n">features</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span><span class="n">audio_array</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
+</span><span id="L-136"><a href="#L-136"><span class="linenos">136</span></a>        <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="L-137"><a href="#L-137"><span class="linenos">137</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -284,144 +243,109 @@ pushed through the checkpoint as a batch of one.</p>
 </span><span id="ModelLoader-33"><a href="#ModelLoader-33"><span class="linenos"> 33</span></a><span class="sd">        Device to run the forward pass on. Defaults to CPU so the loader also</span>
 </span><span id="ModelLoader-34"><a href="#ModelLoader-34"><span class="linenos"> 34</span></a><span class="sd">        works on machines without CUDA.</span>
 </span><span id="ModelLoader-35"><a href="#ModelLoader-35"><span class="linenos"> 35</span></a>
-</span><span id="ModelLoader-36"><a href="#ModelLoader-36"><span class="linenos"> 36</span></a><span class="sd">    Attributes</span>
-</span><span id="ModelLoader-37"><a href="#ModelLoader-37"><span class="linenos"> 37</span></a><span class="sd">    ----------</span>
-</span><span id="ModelLoader-38"><a href="#ModelLoader-38"><span class="linenos"> 38</span></a><span class="sd">    is_trained : bool</span>
-</span><span id="ModelLoader-39"><a href="#ModelLoader-39"><span class="linenos"> 39</span></a><span class="sd">        ``False`` when no checkpoint was found and the network was built with</span>
-</span><span id="ModelLoader-40"><a href="#ModelLoader-40"><span class="linenos"> 40</span></a><span class="sd">        random weights. The UI uses it to warn that predictions are meaningless.</span>
-</span><span id="ModelLoader-41"><a href="#ModelLoader-41"><span class="linenos"> 41</span></a><span class="sd">    checkpoint : pathlib.Path or None</span>
-</span><span id="ModelLoader-42"><a href="#ModelLoader-42"><span class="linenos"> 42</span></a><span class="sd">        File the weights were read from, or ``None`` when a ``model`` was</span>
-</span><span id="ModelLoader-43"><a href="#ModelLoader-43"><span class="linenos"> 43</span></a><span class="sd">        passed in or no checkpoint exists.</span>
-</span><span id="ModelLoader-44"><a href="#ModelLoader-44"><span class="linenos"> 44</span></a>
-</span><span id="ModelLoader-45"><a href="#ModelLoader-45"><span class="linenos"> 45</span></a><span class="sd">    Raises</span>
-</span><span id="ModelLoader-46"><a href="#ModelLoader-46"><span class="linenos"> 46</span></a><span class="sd">    ------</span>
-</span><span id="ModelLoader-47"><a href="#ModelLoader-47"><span class="linenos"> 47</span></a><span class="sd">    FileNotFoundError</span>
-</span><span id="ModelLoader-48"><a href="#ModelLoader-48"><span class="linenos"> 48</span></a><span class="sd">        If ``models/model.pt`` does not exist. The loader falls back to random</span>
-</span><span id="ModelLoader-49"><a href="#ModelLoader-49"><span class="linenos"> 49</span></a><span class="sd">        weights when no model has been trained yet.</span>
-</span><span id="ModelLoader-50"><a href="#ModelLoader-50"><span class="linenos"> 50</span></a><span class="sd">    ValueError</span>
-</span><span id="ModelLoader-51"><a href="#ModelLoader-51"><span class="linenos"> 51</span></a><span class="sd">        If the checkpoint does not contain model weights and configuration.</span>
-</span><span id="ModelLoader-52"><a href="#ModelLoader-52"><span class="linenos"> 52</span></a><span class="sd">    """</span>
-</span><span id="ModelLoader-53"><a href="#ModelLoader-53"><span class="linenos"> 53</span></a>
-</span><span id="ModelLoader-54"><a href="#ModelLoader-54"><span class="linenos"> 54</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="ModelLoader-55"><a href="#ModelLoader-55"><span class="linenos"> 55</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="ModelLoader-56"><a href="#ModelLoader-56"><span class="linenos"> 56</span></a>        <span class="n">model</span><span class="p">:</span> <span class="n">Net</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="ModelLoader-57"><a href="#ModelLoader-57"><span class="linenos"> 57</span></a>        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="s2">"cpu"</span><span class="p">,</span>
-</span><span id="ModelLoader-58"><a href="#ModelLoader-58"><span class="linenos"> 58</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="ModelLoader-59"><a href="#ModelLoader-59"><span class="linenos"> 59</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-</span><span id="ModelLoader-60"><a href="#ModelLoader-60"><span class="linenos"> 60</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="ModelLoader-61"><a href="#ModelLoader-61"><span class="linenos"> 61</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span> <span class="o">=</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span id="ModelLoader-62"><a href="#ModelLoader-62"><span class="linenos"> 62</span></a>
-</span><span id="ModelLoader-63"><a href="#ModelLoader-63"><span class="linenos"> 63</span></a>        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="ModelLoader-64"><a href="#ModelLoader-64"><span class="linenos"> 64</span></a>            <span class="k">try</span><span class="p">:</span>
-</span><span id="ModelLoader-65"><a href="#ModelLoader-65"><span class="linenos"> 65</span></a>                <span class="n">checkpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_checkpoint</span><span class="p">()</span>
-</span><span id="ModelLoader-66"><a href="#ModelLoader-66"><span class="linenos"> 66</span></a>                <span class="n">payload</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="ModelLoader-67"><a href="#ModelLoader-67"><span class="linenos"> 67</span></a>                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">{</span><span class="s2">"state_dict"</span><span class="p">,</span> <span class="s2">"config"</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">payload</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-</span><span id="ModelLoader-68"><a href="#ModelLoader-68"><span class="linenos"> 68</span></a>                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2"> is not a latest-model checkpoint"</span><span class="p">)</span>
-</span><span id="ModelLoader-69"><a href="#ModelLoader-69"><span class="linenos"> 69</span></a>
-</span><span id="ModelLoader-70"><a href="#ModelLoader-70"><span class="linenos"> 70</span></a>                <span class="n">config</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"config"</span><span class="p">]</span>
-</span><span id="ModelLoader-71"><a href="#ModelLoader-71"><span class="linenos"> 71</span></a>                <span class="n">model</span> <span class="o">=</span> <span class="n">Net</span><span class="p">(</span>
-</span><span id="ModelLoader-72"><a href="#ModelLoader-72"><span class="linenos"> 72</span></a>                    <span class="n">input_dim</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"input_dim"</span><span class="p">],</span>
-</span><span id="ModelLoader-73"><a href="#ModelLoader-73"><span class="linenos"> 73</span></a>                    <span class="n">hidden_sizes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">"hidden_sizes"</span><span class="p">]),</span>
-</span><span id="ModelLoader-74"><a href="#ModelLoader-74"><span class="linenos"> 74</span></a>                    <span class="n">num_classes</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"num_classes"</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
-</span><span id="ModelLoader-75"><a href="#ModelLoader-75"><span class="linenos"> 75</span></a>                    <span class="n">activation_function</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"activation_function"</span><span class="p">],</span>
-</span><span id="ModelLoader-76"><a href="#ModelLoader-76"><span class="linenos"> 76</span></a>                    <span class="n">regularization</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"regularization"</span><span class="p">],</span>
-</span><span id="ModelLoader-77"><a href="#ModelLoader-77"><span class="linenos"> 77</span></a>                    <span class="n">reg_param</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"reg_param"</span><span class="p">],</span>
-</span><span id="ModelLoader-78"><a href="#ModelLoader-78"><span class="linenos"> 78</span></a>                <span class="p">)</span>
-</span><span id="ModelLoader-79"><a href="#ModelLoader-79"><span class="linenos"> 79</span></a>                <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">"state_dict"</span><span class="p">])</span>
-</span><span id="ModelLoader-80"><a href="#ModelLoader-80"><span class="linenos"> 80</span></a>            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-</span><span id="ModelLoader-81"><a href="#ModelLoader-81"><span class="linenos"> 81</span></a>                <span class="n">checkpoint</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="ModelLoader-82"><a href="#ModelLoader-82"><span class="linenos"> 82</span></a>            <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">,</span> <span class="n">pickle</span><span class="o">.</span><span class="n">UnpicklingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-</span><span id="ModelLoader-83"><a href="#ModelLoader-83"><span class="linenos"> 83</span></a>                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2"> is unusable (</span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">); starting untrained."</span><span class="p">)</span>
-</span><span id="ModelLoader-84"><a href="#ModelLoader-84"><span class="linenos"> 84</span></a>                <span class="n">checkpoint</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="ModelLoader-85"><a href="#ModelLoader-85"><span class="linenos"> 85</span></a>
-</span><span id="ModelLoader-86"><a href="#ModelLoader-86"><span class="linenos"> 86</span></a>            <span class="k">if</span> <span class="n">checkpoint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="ModelLoader-87"><a href="#ModelLoader-87"><span class="linenos"> 87</span></a>                <span class="n">model</span> <span class="o">=</span> <span class="n">Net</span><span class="p">()</span>  <span class="c1"># random weights: nothing has been trained yet</span>
-</span><span id="ModelLoader-88"><a href="#ModelLoader-88"><span class="linenos"> 88</span></a>            <span class="k">else</span><span class="p">:</span>
-</span><span id="ModelLoader-89"><a href="#ModelLoader-89"><span class="linenos"> 89</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="n">checkpoint</span>
-</span><span id="ModelLoader-90"><a href="#ModelLoader-90"><span class="linenos"> 90</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="ModelLoader-91"><a href="#ModelLoader-91"><span class="linenos"> 91</span></a>
-</span><span id="ModelLoader-92"><a href="#ModelLoader-92"><span class="linenos"> 92</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-</span><span id="ModelLoader-93"><a href="#ModelLoader-93"><span class="linenos"> 93</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-</span><span id="ModelLoader-94"><a href="#ModelLoader-94"><span class="linenos"> 94</span></a>
-</span><span id="ModelLoader-95"><a href="#ModelLoader-95"><span class="linenos"> 95</span></a>    <span class="nd">@staticmethod</span>
-</span><span id="ModelLoader-96"><a href="#ModelLoader-96"><span class="linenos"> 96</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_checkpoint</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-</span><span id="ModelLoader-97"><a href="#ModelLoader-97"><span class="linenos"> 97</span></a><span class="w">        </span><span class="sd">"""Return the latest model checkpoint.</span>
-</span><span id="ModelLoader-98"><a href="#ModelLoader-98"><span class="linenos"> 98</span></a>
-</span><span id="ModelLoader-99"><a href="#ModelLoader-99"><span class="linenos"> 99</span></a><span class="sd">        Returns</span>
-</span><span id="ModelLoader-100"><a href="#ModelLoader-100"><span class="linenos">100</span></a><span class="sd">        -------</span>
-</span><span id="ModelLoader-101"><a href="#ModelLoader-101"><span class="linenos">101</span></a><span class="sd">        pathlib.Path</span>
-</span><span id="ModelLoader-102"><a href="#ModelLoader-102"><span class="linenos">102</span></a><span class="sd">            Path to ``models/model.pt``.</span>
-</span><span id="ModelLoader-103"><a href="#ModelLoader-103"><span class="linenos">103</span></a>
-</span><span id="ModelLoader-104"><a href="#ModelLoader-104"><span class="linenos">104</span></a><span class="sd">        Raises</span>
-</span><span id="ModelLoader-105"><a href="#ModelLoader-105"><span class="linenos">105</span></a><span class="sd">        ------</span>
-</span><span id="ModelLoader-106"><a href="#ModelLoader-106"><span class="linenos">106</span></a><span class="sd">        FileNotFoundError</span>
-</span><span id="ModelLoader-107"><a href="#ModelLoader-107"><span class="linenos">107</span></a><span class="sd">            If the latest model has not been saved yet.</span>
-</span><span id="ModelLoader-108"><a href="#ModelLoader-108"><span class="linenos">108</span></a><span class="sd">        """</span>
-</span><span id="ModelLoader-109"><a href="#ModelLoader-109"><span class="linenos">109</span></a>        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">MODEL_DIR</span> <span class="o">/</span> <span class="s2">"model.pt"</span>
-</span><span id="ModelLoader-110"><a href="#ModelLoader-110"><span class="linenos">110</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">checkpoint</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-</span><span id="ModelLoader-111"><a href="#ModelLoader-111"><span class="linenos">111</span></a>            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
-</span><span id="ModelLoader-112"><a href="#ModelLoader-112"><span class="linenos">112</span></a>                <span class="sa">f</span><span class="s2">"No latest model found at </span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2">. Train a model first and save it with"</span>
-</span><span id="ModelLoader-113"><a href="#ModelLoader-113"><span class="linenos">113</span></a>                <span class="s2">" sdoml_task1.modeling.train.save_run()."</span>
-</span><span id="ModelLoader-114"><a href="#ModelLoader-114"><span class="linenos">114</span></a>            <span class="p">)</span>
-</span><span id="ModelLoader-115"><a href="#ModelLoader-115"><span class="linenos">115</span></a>        <span class="k">return</span> <span class="n">checkpoint</span>
-</span><span id="ModelLoader-116"><a href="#ModelLoader-116"><span class="linenos">116</span></a>
-</span><span id="ModelLoader-117"><a href="#ModelLoader-117"><span class="linenos">117</span></a>    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
-</span><span id="ModelLoader-118"><a href="#ModelLoader-118"><span class="linenos">118</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="ModelLoader-119"><a href="#ModelLoader-119"><span class="linenos">119</span></a><span class="w">        </span><span class="sd">"""Predict class probabilities from a MFCC feature vector.</span>
+</span><span id="ModelLoader-36"><a href="#ModelLoader-36"><span class="linenos"> 36</span></a><span class="sd">    Raises</span>
+</span><span id="ModelLoader-37"><a href="#ModelLoader-37"><span class="linenos"> 37</span></a><span class="sd">    ------</span>
+</span><span id="ModelLoader-38"><a href="#ModelLoader-38"><span class="linenos"> 38</span></a><span class="sd">    FileNotFoundError</span>
+</span><span id="ModelLoader-39"><a href="#ModelLoader-39"><span class="linenos"> 39</span></a><span class="sd">        If ``models/model.pt`` does not exist.</span>
+</span><span id="ModelLoader-40"><a href="#ModelLoader-40"><span class="linenos"> 40</span></a><span class="sd">    ValueError</span>
+</span><span id="ModelLoader-41"><a href="#ModelLoader-41"><span class="linenos"> 41</span></a><span class="sd">        If the checkpoint does not contain model weights and configuration.</span>
+</span><span id="ModelLoader-42"><a href="#ModelLoader-42"><span class="linenos"> 42</span></a><span class="sd">    """</span>
+</span><span id="ModelLoader-43"><a href="#ModelLoader-43"><span class="linenos"> 43</span></a>
+</span><span id="ModelLoader-44"><a href="#ModelLoader-44"><span class="linenos"> 44</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="ModelLoader-45"><a href="#ModelLoader-45"><span class="linenos"> 45</span></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="ModelLoader-46"><a href="#ModelLoader-46"><span class="linenos"> 46</span></a>        <span class="n">model</span><span class="p">:</span> <span class="n">Net</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="ModelLoader-47"><a href="#ModelLoader-47"><span class="linenos"> 47</span></a>        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="s2">"cpu"</span><span class="p">,</span>
+</span><span id="ModelLoader-48"><a href="#ModelLoader-48"><span class="linenos"> 48</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="ModelLoader-49"><a href="#ModelLoader-49"><span class="linenos"> 49</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="ModelLoader-50"><a href="#ModelLoader-50"><span class="linenos"> 50</span></a>
+</span><span id="ModelLoader-51"><a href="#ModelLoader-51"><span class="linenos"> 51</span></a>        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="ModelLoader-52"><a href="#ModelLoader-52"><span class="linenos"> 52</span></a>            <span class="n">checkpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_checkpoint</span><span class="p">()</span>
+</span><span id="ModelLoader-53"><a href="#ModelLoader-53"><span class="linenos"> 53</span></a>            <span class="n">payload</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="ModelLoader-54"><a href="#ModelLoader-54"><span class="linenos"> 54</span></a>            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">{</span><span class="s2">"state_dict"</span><span class="p">,</span> <span class="s2">"config"</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">payload</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+</span><span id="ModelLoader-55"><a href="#ModelLoader-55"><span class="linenos"> 55</span></a>                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2"> is not a latest-model checkpoint"</span><span class="p">)</span>
+</span><span id="ModelLoader-56"><a href="#ModelLoader-56"><span class="linenos"> 56</span></a>
+</span><span id="ModelLoader-57"><a href="#ModelLoader-57"><span class="linenos"> 57</span></a>            <span class="n">config</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"config"</span><span class="p">]</span>
+</span><span id="ModelLoader-58"><a href="#ModelLoader-58"><span class="linenos"> 58</span></a>            <span class="n">model</span> <span class="o">=</span> <span class="n">Net</span><span class="p">(</span>
+</span><span id="ModelLoader-59"><a href="#ModelLoader-59"><span class="linenos"> 59</span></a>                <span class="n">input_dim</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"input_dim"</span><span class="p">],</span>
+</span><span id="ModelLoader-60"><a href="#ModelLoader-60"><span class="linenos"> 60</span></a>                <span class="n">hidden_sizes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">"hidden_sizes"</span><span class="p">]),</span>
+</span><span id="ModelLoader-61"><a href="#ModelLoader-61"><span class="linenos"> 61</span></a>                <span class="n">num_classes</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"num_classes"</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+</span><span id="ModelLoader-62"><a href="#ModelLoader-62"><span class="linenos"> 62</span></a>                <span class="n">activation_function</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"activation_function"</span><span class="p">],</span>
+</span><span id="ModelLoader-63"><a href="#ModelLoader-63"><span class="linenos"> 63</span></a>                <span class="n">regularization</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"regularization"</span><span class="p">],</span>
+</span><span id="ModelLoader-64"><a href="#ModelLoader-64"><span class="linenos"> 64</span></a>                <span class="n">reg_param</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"reg_param"</span><span class="p">],</span>
+</span><span id="ModelLoader-65"><a href="#ModelLoader-65"><span class="linenos"> 65</span></a>            <span class="p">)</span>
+</span><span id="ModelLoader-66"><a href="#ModelLoader-66"><span class="linenos"> 66</span></a>            <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">"state_dict"</span><span class="p">])</span>
+</span><span id="ModelLoader-67"><a href="#ModelLoader-67"><span class="linenos"> 67</span></a>
+</span><span id="ModelLoader-68"><a href="#ModelLoader-68"><span class="linenos"> 68</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+</span><span id="ModelLoader-69"><a href="#ModelLoader-69"><span class="linenos"> 69</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="ModelLoader-70"><a href="#ModelLoader-70"><span class="linenos"> 70</span></a>
+</span><span id="ModelLoader-71"><a href="#ModelLoader-71"><span class="linenos"> 71</span></a>    <span class="nd">@staticmethod</span>
+</span><span id="ModelLoader-72"><a href="#ModelLoader-72"><span class="linenos"> 72</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_resolve_checkpoint</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+</span><span id="ModelLoader-73"><a href="#ModelLoader-73"><span class="linenos"> 73</span></a><span class="w">        </span><span class="sd">"""Return the latest model checkpoint.</span>
+</span><span id="ModelLoader-74"><a href="#ModelLoader-74"><span class="linenos"> 74</span></a>
+</span><span id="ModelLoader-75"><a href="#ModelLoader-75"><span class="linenos"> 75</span></a><span class="sd">        Returns</span>
+</span><span id="ModelLoader-76"><a href="#ModelLoader-76"><span class="linenos"> 76</span></a><span class="sd">        -------</span>
+</span><span id="ModelLoader-77"><a href="#ModelLoader-77"><span class="linenos"> 77</span></a><span class="sd">        pathlib.Path</span>
+</span><span id="ModelLoader-78"><a href="#ModelLoader-78"><span class="linenos"> 78</span></a><span class="sd">            Path to ``models/model.pt``.</span>
+</span><span id="ModelLoader-79"><a href="#ModelLoader-79"><span class="linenos"> 79</span></a>
+</span><span id="ModelLoader-80"><a href="#ModelLoader-80"><span class="linenos"> 80</span></a><span class="sd">        Raises</span>
+</span><span id="ModelLoader-81"><a href="#ModelLoader-81"><span class="linenos"> 81</span></a><span class="sd">        ------</span>
+</span><span id="ModelLoader-82"><a href="#ModelLoader-82"><span class="linenos"> 82</span></a><span class="sd">        FileNotFoundError</span>
+</span><span id="ModelLoader-83"><a href="#ModelLoader-83"><span class="linenos"> 83</span></a><span class="sd">            If the latest model has not been saved yet.</span>
+</span><span id="ModelLoader-84"><a href="#ModelLoader-84"><span class="linenos"> 84</span></a><span class="sd">        """</span>
+</span><span id="ModelLoader-85"><a href="#ModelLoader-85"><span class="linenos"> 85</span></a>        <span class="n">checkpoint</span> <span class="o">=</span> <span class="n">MODEL_DIR</span> <span class="o">/</span> <span class="s2">"model.pt"</span>
+</span><span id="ModelLoader-86"><a href="#ModelLoader-86"><span class="linenos"> 86</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="n">checkpoint</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+</span><span id="ModelLoader-87"><a href="#ModelLoader-87"><span class="linenos"> 87</span></a>            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span>
+</span><span id="ModelLoader-88"><a href="#ModelLoader-88"><span class="linenos"> 88</span></a>                <span class="sa">f</span><span class="s2">"No latest model found at </span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2">. Train a model first and save it with"</span>
+</span><span id="ModelLoader-89"><a href="#ModelLoader-89"><span class="linenos"> 89</span></a>                <span class="s2">" sdoml_task1.modeling.train.save_run()."</span>
+</span><span id="ModelLoader-90"><a href="#ModelLoader-90"><span class="linenos"> 90</span></a>            <span class="p">)</span>
+</span><span id="ModelLoader-91"><a href="#ModelLoader-91"><span class="linenos"> 91</span></a>        <span class="k">return</span> <span class="n">checkpoint</span>
+</span><span id="ModelLoader-92"><a href="#ModelLoader-92"><span class="linenos"> 92</span></a>
+</span><span id="ModelLoader-93"><a href="#ModelLoader-93"><span class="linenos"> 93</span></a>    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+</span><span id="ModelLoader-94"><a href="#ModelLoader-94"><span class="linenos"> 94</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">_predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="ModelLoader-95"><a href="#ModelLoader-95"><span class="linenos"> 95</span></a><span class="w">        </span><span class="sd">"""Predict class probabilities from a MFCC feature vector.</span>
+</span><span id="ModelLoader-96"><a href="#ModelLoader-96"><span class="linenos"> 96</span></a>
+</span><span id="ModelLoader-97"><a href="#ModelLoader-97"><span class="linenos"> 97</span></a><span class="sd">        Parameters</span>
+</span><span id="ModelLoader-98"><a href="#ModelLoader-98"><span class="linenos"> 98</span></a><span class="sd">        ----------</span>
+</span><span id="ModelLoader-99"><a href="#ModelLoader-99"><span class="linenos"> 99</span></a><span class="sd">        X : torch.Tensor</span>
+</span><span id="ModelLoader-100"><a href="#ModelLoader-100"><span class="linenos">100</span></a><span class="sd">            Feature tensor of shape ``(batch_size, 26)``.</span>
+</span><span id="ModelLoader-101"><a href="#ModelLoader-101"><span class="linenos">101</span></a>
+</span><span id="ModelLoader-102"><a href="#ModelLoader-102"><span class="linenos">102</span></a><span class="sd">        Returns</span>
+</span><span id="ModelLoader-103"><a href="#ModelLoader-103"><span class="linenos">103</span></a><span class="sd">        -------</span>
+</span><span id="ModelLoader-104"><a href="#ModelLoader-104"><span class="linenos">104</span></a><span class="sd">        numpy.ndarray</span>
+</span><span id="ModelLoader-105"><a href="#ModelLoader-105"><span class="linenos">105</span></a><span class="sd">            Probabilities of shape ``(10,)`` for a single sample, or</span>
+</span><span id="ModelLoader-106"><a href="#ModelLoader-106"><span class="linenos">106</span></a><span class="sd">            ``(batch_size, 10)`` when several samples are passed.</span>
+</span><span id="ModelLoader-107"><a href="#ModelLoader-107"><span class="linenos">107</span></a><span class="sd">        """</span>
+</span><span id="ModelLoader-108"><a href="#ModelLoader-108"><span class="linenos">108</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+</span><span id="ModelLoader-109"><a href="#ModelLoader-109"><span class="linenos">109</span></a>        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
+</span><span id="ModelLoader-110"><a href="#ModelLoader-110"><span class="linenos">110</span></a>        <span class="n">probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+</span><span id="ModelLoader-111"><a href="#ModelLoader-111"><span class="linenos">111</span></a>        <span class="k">return</span> <span class="n">probs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">probs</span>
+</span><span id="ModelLoader-112"><a href="#ModelLoader-112"><span class="linenos">112</span></a>
+</span><span id="ModelLoader-113"><a href="#ModelLoader-113"><span class="linenos">113</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">make_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="ModelLoader-114"><a href="#ModelLoader-114"><span class="linenos">114</span></a><span class="w">        </span><span class="sd">"""Turn an audio file into digit probabilities.</span>
+</span><span id="ModelLoader-115"><a href="#ModelLoader-115"><span class="linenos">115</span></a>
+</span><span id="ModelLoader-116"><a href="#ModelLoader-116"><span class="linenos">116</span></a><span class="sd">        - Loads the file at its native sample rate, mixed down to mono</span>
+</span><span id="ModelLoader-117"><a href="#ModelLoader-117"><span class="linenos">117</span></a><span class="sd">        - Extracts the 26 MFCC features used in training</span>
+</span><span id="ModelLoader-118"><a href="#ModelLoader-118"><span class="linenos">118</span></a><span class="sd">        - Converts them into a ``(1, 26)`` float32 tensor</span>
+</span><span id="ModelLoader-119"><a href="#ModelLoader-119"><span class="linenos">119</span></a><span class="sd">        - Returns the probabilities of the 10 digits</span>
 </span><span id="ModelLoader-120"><a href="#ModelLoader-120"><span class="linenos">120</span></a>
 </span><span id="ModelLoader-121"><a href="#ModelLoader-121"><span class="linenos">121</span></a><span class="sd">        Parameters</span>
 </span><span id="ModelLoader-122"><a href="#ModelLoader-122"><span class="linenos">122</span></a><span class="sd">        ----------</span>
-</span><span id="ModelLoader-123"><a href="#ModelLoader-123"><span class="linenos">123</span></a><span class="sd">        X : torch.Tensor</span>
-</span><span id="ModelLoader-124"><a href="#ModelLoader-124"><span class="linenos">124</span></a><span class="sd">            Feature tensor of shape ``(batch_size, 26)``.</span>
-</span><span id="ModelLoader-125"><a href="#ModelLoader-125"><span class="linenos">125</span></a>
-</span><span id="ModelLoader-126"><a href="#ModelLoader-126"><span class="linenos">126</span></a><span class="sd">        Returns</span>
-</span><span id="ModelLoader-127"><a href="#ModelLoader-127"><span class="linenos">127</span></a><span class="sd">        -------</span>
-</span><span id="ModelLoader-128"><a href="#ModelLoader-128"><span class="linenos">128</span></a><span class="sd">        numpy.ndarray</span>
-</span><span id="ModelLoader-129"><a href="#ModelLoader-129"><span class="linenos">129</span></a><span class="sd">            Probabilities of shape ``(10,)`` for a single sample, or</span>
-</span><span id="ModelLoader-130"><a href="#ModelLoader-130"><span class="linenos">130</span></a><span class="sd">            ``(batch_size, 10)`` when several samples are passed.</span>
-</span><span id="ModelLoader-131"><a href="#ModelLoader-131"><span class="linenos">131</span></a><span class="sd">        """</span>
-</span><span id="ModelLoader-132"><a href="#ModelLoader-132"><span class="linenos">132</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
-</span><span id="ModelLoader-133"><a href="#ModelLoader-133"><span class="linenos">133</span></a>        <span class="n">logits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">))</span>
-</span><span id="ModelLoader-134"><a href="#ModelLoader-134"><span class="linenos">134</span></a>        <span class="n">probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logits</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
-</span><span id="ModelLoader-135"><a href="#ModelLoader-135"><span class="linenos">135</span></a>        <span class="k">return</span> <span class="n">probs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">probs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="n">probs</span>
-</span><span id="ModelLoader-136"><a href="#ModelLoader-136"><span class="linenos">136</span></a>
-</span><span id="ModelLoader-137"><a href="#ModelLoader-137"><span class="linenos">137</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">make_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="ModelLoader-138"><a href="#ModelLoader-138"><span class="linenos">138</span></a><span class="w">        </span><span class="sd">"""Turn an audio file into digit probabilities.</span>
-</span><span id="ModelLoader-139"><a href="#ModelLoader-139"><span class="linenos">139</span></a>
-</span><span id="ModelLoader-140"><a href="#ModelLoader-140"><span class="linenos">140</span></a><span class="sd">        - Loads the file at its native sample rate, mixed down to mono</span>
-</span><span id="ModelLoader-141"><a href="#ModelLoader-141"><span class="linenos">141</span></a><span class="sd">        - Extracts the 26 MFCC features used in training</span>
-</span><span id="ModelLoader-142"><a href="#ModelLoader-142"><span class="linenos">142</span></a><span class="sd">        - Converts them into a ``(1, 26)`` float32 tensor</span>
-</span><span id="ModelLoader-143"><a href="#ModelLoader-143"><span class="linenos">143</span></a><span class="sd">        - Returns the probabilities of the 10 digits</span>
-</span><span id="ModelLoader-144"><a href="#ModelLoader-144"><span class="linenos">144</span></a>
-</span><span id="ModelLoader-145"><a href="#ModelLoader-145"><span class="linenos">145</span></a><span class="sd">        Parameters</span>
-</span><span id="ModelLoader-146"><a href="#ModelLoader-146"><span class="linenos">146</span></a><span class="sd">        ----------</span>
-</span><span id="ModelLoader-147"><a href="#ModelLoader-147"><span class="linenos">147</span></a><span class="sd">        audio_path : str</span>
-</span><span id="ModelLoader-148"><a href="#ModelLoader-148"><span class="linenos">148</span></a><span class="sd">            Path to the audio file, e.g. the filepath a ``gr.Audio`` component</span>
-</span><span id="ModelLoader-149"><a href="#ModelLoader-149"><span class="linenos">149</span></a><span class="sd">            hands to its callback.</span>
-</span><span id="ModelLoader-150"><a href="#ModelLoader-150"><span class="linenos">150</span></a>
-</span><span id="ModelLoader-151"><a href="#ModelLoader-151"><span class="linenos">151</span></a><span class="sd">        Returns</span>
-</span><span id="ModelLoader-152"><a href="#ModelLoader-152"><span class="linenos">152</span></a><span class="sd">        -------</span>
-</span><span id="ModelLoader-153"><a href="#ModelLoader-153"><span class="linenos">153</span></a><span class="sd">        numpy.ndarray</span>
-</span><span id="ModelLoader-154"><a href="#ModelLoader-154"><span class="linenos">154</span></a><span class="sd">            Probability vector of shape ``(10,)``.</span>
-</span><span id="ModelLoader-155"><a href="#ModelLoader-155"><span class="linenos">155</span></a>
-</span><span id="ModelLoader-156"><a href="#ModelLoader-156"><span class="linenos">156</span></a><span class="sd">        Raises</span>
-</span><span id="ModelLoader-157"><a href="#ModelLoader-157"><span class="linenos">157</span></a><span class="sd">        ------</span>
-</span><span id="ModelLoader-158"><a href="#ModelLoader-158"><span class="linenos">158</span></a><span class="sd">        RuntimeError</span>
-</span><span id="ModelLoader-159"><a href="#ModelLoader-159"><span class="linenos">159</span></a><span class="sd">            If no trained model is loaded: with random weights the numbers</span>
-</span><span id="ModelLoader-160"><a href="#ModelLoader-160"><span class="linenos">160</span></a><span class="sd">            would look like predictions without meaning anything.</span>
-</span><span id="ModelLoader-161"><a href="#ModelLoader-161"><span class="linenos">161</span></a><span class="sd">        """</span>
-</span><span id="ModelLoader-162"><a href="#ModelLoader-162"><span class="linenos">162</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span><span class="p">:</span>
-</span><span id="ModelLoader-163"><a href="#ModelLoader-163"><span class="linenos">163</span></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-</span><span id="ModelLoader-164"><a href="#ModelLoader-164"><span class="linenos">164</span></a>                <span class="s2">"No trained model is loaded: train a model and save it with"</span>
-</span><span id="ModelLoader-165"><a href="#ModelLoader-165"><span class="linenos">165</span></a>                <span class="s2">" sdoml_task1.modeling.train.save_run() first."</span>
-</span><span id="ModelLoader-166"><a href="#ModelLoader-166"><span class="linenos">166</span></a>            <span class="p">)</span>
-</span><span id="ModelLoader-167"><a href="#ModelLoader-167"><span class="linenos">167</span></a>        <span class="kn">from</span><span class="w"> </span><span class="nn">sdoml_task1.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_features</span>
-</span><span id="ModelLoader-168"><a href="#ModelLoader-168"><span class="linenos">168</span></a>        <span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
-</span><span id="ModelLoader-169"><a href="#ModelLoader-169"><span class="linenos">169</span></a>
-</span><span id="ModelLoader-170"><a href="#ModelLoader-170"><span class="linenos">170</span></a>        <span class="n">audio_array</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">audio_path</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="ModelLoader-171"><a href="#ModelLoader-171"><span class="linenos">171</span></a>        <span class="n">features</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span><span class="n">audio_array</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
-</span><span id="ModelLoader-172"><a href="#ModelLoader-172"><span class="linenos">172</span></a>        <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span id="ModelLoader-173"><a href="#ModelLoader-173"><span class="linenos">173</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</span><span id="ModelLoader-123"><a href="#ModelLoader-123"><span class="linenos">123</span></a><span class="sd">        audio_path : str</span>
+</span><span id="ModelLoader-124"><a href="#ModelLoader-124"><span class="linenos">124</span></a><span class="sd">            Path to the audio file, e.g. the filepath a ``gr.Audio`` component</span>
+</span><span id="ModelLoader-125"><a href="#ModelLoader-125"><span class="linenos">125</span></a><span class="sd">            hands to its callback.</span>
+</span><span id="ModelLoader-126"><a href="#ModelLoader-126"><span class="linenos">126</span></a>
+</span><span id="ModelLoader-127"><a href="#ModelLoader-127"><span class="linenos">127</span></a><span class="sd">        Returns</span>
+</span><span id="ModelLoader-128"><a href="#ModelLoader-128"><span class="linenos">128</span></a><span class="sd">        -------</span>
+</span><span id="ModelLoader-129"><a href="#ModelLoader-129"><span class="linenos">129</span></a><span class="sd">        numpy.ndarray</span>
+</span><span id="ModelLoader-130"><a href="#ModelLoader-130"><span class="linenos">130</span></a><span class="sd">            Probability vector of shape ``(10,)``.</span>
+</span><span id="ModelLoader-131"><a href="#ModelLoader-131"><span class="linenos">131</span></a>
+</span><span id="ModelLoader-132"><a href="#ModelLoader-132"><span class="linenos">132</span></a><span class="sd">        Raises</span>
+</span><span id="ModelLoader-133"><a href="#ModelLoader-133"><span class="linenos">133</span></a><span class="sd">        ------</span>
+</span><span id="ModelLoader-134"><a href="#ModelLoader-134"><span class="linenos">134</span></a><span class="sd">        """</span>
+</span><span id="ModelLoader-135"><a href="#ModelLoader-135"><span class="linenos">135</span></a>        <span class="n">audio_array</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">audio_path</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="ModelLoader-136"><a href="#ModelLoader-136"><span class="linenos">136</span></a>        <span class="n">features</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span><span class="n">audio_array</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
+</span><span id="ModelLoader-137"><a href="#ModelLoader-137"><span class="linenos">137</span></a>        <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="ModelLoader-138"><a href="#ModelLoader-138"><span class="linenos">138</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -437,22 +361,10 @@ Device to run the forward pass on. Defaults to CPU so the loader also
 works on machines without CUDA.</li>
 </ul>
 
-<h6 id="attributes">Attributes</h6>
-
-<ul>
-<li><strong>is_trained</strong> (bool):
-<code>False</code> when no checkpoint was found and the network was built with
-random weights. The UI uses it to warn that predictions are meaningless.</li>
-<li><strong>checkpoint</strong> (pathlib.Path or None):
-File the weights were read from, or <code>None</code> when a <code><a href="#ModelLoader.model">model</a></code> was
-passed in or no checkpoint exists.</li>
-</ul>
-
 <h6 id="raises">Raises</h6>
 
 <ul>
-<li><strong>FileNotFoundError</strong>: If <code>models/model.pt</code> does not exist. The loader falls back to random
-weights when no model has been trained yet.</li>
+<li><strong>FileNotFoundError</strong>: If <code>models/model.pt</code> does not exist.</li>
 <li><strong>ValueError</strong>: If the checkpoint does not contain model weights and configuration.</li>
 </ul>
 </div>
@@ -468,46 +380,32 @@ weights when no model has been trained yet.</li>
 
     </div>
     <a class="headerlink" href="#ModelLoader.__init__"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ModelLoader.__init__-54"><a href="#ModelLoader.__init__-54"><span class="linenos">54</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
-</span><span id="ModelLoader.__init__-55"><a href="#ModelLoader.__init__-55"><span class="linenos">55</span></a>        <span class="bp">self</span><span class="p">,</span>
-</span><span id="ModelLoader.__init__-56"><a href="#ModelLoader.__init__-56"><span class="linenos">56</span></a>        <span class="n">model</span><span class="p">:</span> <span class="n">Net</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-</span><span id="ModelLoader.__init__-57"><a href="#ModelLoader.__init__-57"><span class="linenos">57</span></a>        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="s2">"cpu"</span><span class="p">,</span>
-</span><span id="ModelLoader.__init__-58"><a href="#ModelLoader.__init__-58"><span class="linenos">58</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="ModelLoader.__init__-59"><a href="#ModelLoader.__init__-59"><span class="linenos">59</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
-</span><span id="ModelLoader.__init__-60"><a href="#ModelLoader.__init__-60"><span class="linenos">60</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span><span class="p">:</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="ModelLoader.__init__-61"><a href="#ModelLoader.__init__-61"><span class="linenos">61</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span> <span class="o">=</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span id="ModelLoader.__init__-62"><a href="#ModelLoader.__init__-62"><span class="linenos">62</span></a>
-</span><span id="ModelLoader.__init__-63"><a href="#ModelLoader.__init__-63"><span class="linenos">63</span></a>        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="ModelLoader.__init__-64"><a href="#ModelLoader.__init__-64"><span class="linenos">64</span></a>            <span class="k">try</span><span class="p">:</span>
-</span><span id="ModelLoader.__init__-65"><a href="#ModelLoader.__init__-65"><span class="linenos">65</span></a>                <span class="n">checkpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_checkpoint</span><span class="p">()</span>
-</span><span id="ModelLoader.__init__-66"><a href="#ModelLoader.__init__-66"><span class="linenos">66</span></a>                <span class="n">payload</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="ModelLoader.__init__-67"><a href="#ModelLoader.__init__-67"><span class="linenos">67</span></a>                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">{</span><span class="s2">"state_dict"</span><span class="p">,</span> <span class="s2">"config"</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">payload</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-</span><span id="ModelLoader.__init__-68"><a href="#ModelLoader.__init__-68"><span class="linenos">68</span></a>                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2"> is not a latest-model checkpoint"</span><span class="p">)</span>
-</span><span id="ModelLoader.__init__-69"><a href="#ModelLoader.__init__-69"><span class="linenos">69</span></a>
-</span><span id="ModelLoader.__init__-70"><a href="#ModelLoader.__init__-70"><span class="linenos">70</span></a>                <span class="n">config</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"config"</span><span class="p">]</span>
-</span><span id="ModelLoader.__init__-71"><a href="#ModelLoader.__init__-71"><span class="linenos">71</span></a>                <span class="n">model</span> <span class="o">=</span> <span class="n">Net</span><span class="p">(</span>
-</span><span id="ModelLoader.__init__-72"><a href="#ModelLoader.__init__-72"><span class="linenos">72</span></a>                    <span class="n">input_dim</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"input_dim"</span><span class="p">],</span>
-</span><span id="ModelLoader.__init__-73"><a href="#ModelLoader.__init__-73"><span class="linenos">73</span></a>                    <span class="n">hidden_sizes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">"hidden_sizes"</span><span class="p">]),</span>
-</span><span id="ModelLoader.__init__-74"><a href="#ModelLoader.__init__-74"><span class="linenos">74</span></a>                    <span class="n">num_classes</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"num_classes"</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
-</span><span id="ModelLoader.__init__-75"><a href="#ModelLoader.__init__-75"><span class="linenos">75</span></a>                    <span class="n">activation_function</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"activation_function"</span><span class="p">],</span>
-</span><span id="ModelLoader.__init__-76"><a href="#ModelLoader.__init__-76"><span class="linenos">76</span></a>                    <span class="n">regularization</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"regularization"</span><span class="p">],</span>
-</span><span id="ModelLoader.__init__-77"><a href="#ModelLoader.__init__-77"><span class="linenos">77</span></a>                    <span class="n">reg_param</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"reg_param"</span><span class="p">],</span>
-</span><span id="ModelLoader.__init__-78"><a href="#ModelLoader.__init__-78"><span class="linenos">78</span></a>                <span class="p">)</span>
-</span><span id="ModelLoader.__init__-79"><a href="#ModelLoader.__init__-79"><span class="linenos">79</span></a>                <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">"state_dict"</span><span class="p">])</span>
-</span><span id="ModelLoader.__init__-80"><a href="#ModelLoader.__init__-80"><span class="linenos">80</span></a>            <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
-</span><span id="ModelLoader.__init__-81"><a href="#ModelLoader.__init__-81"><span class="linenos">81</span></a>                <span class="n">checkpoint</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="ModelLoader.__init__-82"><a href="#ModelLoader.__init__-82"><span class="linenos">82</span></a>            <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">EOFError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">,</span> <span class="n">pickle</span><span class="o">.</span><span class="n">UnpicklingError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-</span><span id="ModelLoader.__init__-83"><a href="#ModelLoader.__init__-83"><span class="linenos">83</span></a>                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2"> is unusable (</span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">); starting untrained."</span><span class="p">)</span>
-</span><span id="ModelLoader.__init__-84"><a href="#ModelLoader.__init__-84"><span class="linenos">84</span></a>                <span class="n">checkpoint</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span id="ModelLoader.__init__-85"><a href="#ModelLoader.__init__-85"><span class="linenos">85</span></a>
-</span><span id="ModelLoader.__init__-86"><a href="#ModelLoader.__init__-86"><span class="linenos">86</span></a>            <span class="k">if</span> <span class="n">checkpoint</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span id="ModelLoader.__init__-87"><a href="#ModelLoader.__init__-87"><span class="linenos">87</span></a>                <span class="n">model</span> <span class="o">=</span> <span class="n">Net</span><span class="p">()</span>  <span class="c1"># random weights: nothing has been trained yet</span>
-</span><span id="ModelLoader.__init__-88"><a href="#ModelLoader.__init__-88"><span class="linenos">88</span></a>            <span class="k">else</span><span class="p">:</span>
-</span><span id="ModelLoader.__init__-89"><a href="#ModelLoader.__init__-89"><span class="linenos">89</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">checkpoint</span> <span class="o">=</span> <span class="n">checkpoint</span>
-</span><span id="ModelLoader.__init__-90"><a href="#ModelLoader.__init__-90"><span class="linenos">90</span></a>                <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span id="ModelLoader.__init__-91"><a href="#ModelLoader.__init__-91"><span class="linenos">91</span></a>
-</span><span id="ModelLoader.__init__-92"><a href="#ModelLoader.__init__-92"><span class="linenos">92</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
-</span><span id="ModelLoader.__init__-93"><a href="#ModelLoader.__init__-93"><span class="linenos">93</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ModelLoader.__init__-44"><a href="#ModelLoader.__init__-44"><span class="linenos">44</span></a>    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+</span><span id="ModelLoader.__init__-45"><a href="#ModelLoader.__init__-45"><span class="linenos">45</span></a>        <span class="bp">self</span><span class="p">,</span>
+</span><span id="ModelLoader.__init__-46"><a href="#ModelLoader.__init__-46"><span class="linenos">46</span></a>        <span class="n">model</span><span class="p">:</span> <span class="n">Net</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+</span><span id="ModelLoader.__init__-47"><a href="#ModelLoader.__init__-47"><span class="linenos">47</span></a>        <span class="n">device</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="s2">"cpu"</span><span class="p">,</span>
+</span><span id="ModelLoader.__init__-48"><a href="#ModelLoader.__init__-48"><span class="linenos">48</span></a>    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="ModelLoader.__init__-49"><a href="#ModelLoader.__init__-49"><span class="linenos">49</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">device</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">device</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+</span><span id="ModelLoader.__init__-50"><a href="#ModelLoader.__init__-50"><span class="linenos">50</span></a>
+</span><span id="ModelLoader.__init__-51"><a href="#ModelLoader.__init__-51"><span class="linenos">51</span></a>        <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span id="ModelLoader.__init__-52"><a href="#ModelLoader.__init__-52"><span class="linenos">52</span></a>            <span class="n">checkpoint</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_resolve_checkpoint</span><span class="p">()</span>
+</span><span id="ModelLoader.__init__-53"><a href="#ModelLoader.__init__-53"><span class="linenos">53</span></a>            <span class="n">payload</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">checkpoint</span><span class="p">,</span> <span class="n">map_location</span><span class="o">=</span><span class="s2">"cpu"</span><span class="p">,</span> <span class="n">weights_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="ModelLoader.__init__-54"><a href="#ModelLoader.__init__-54"><span class="linenos">54</span></a>            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">{</span><span class="s2">"state_dict"</span><span class="p">,</span> <span class="s2">"config"</span><span class="p">}</span> <span class="o">&lt;=</span> <span class="n">payload</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+</span><span id="ModelLoader.__init__-55"><a href="#ModelLoader.__init__-55"><span class="linenos">55</span></a>                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">checkpoint</span><span class="si">}</span><span class="s2"> is not a latest-model checkpoint"</span><span class="p">)</span>
+</span><span id="ModelLoader.__init__-56"><a href="#ModelLoader.__init__-56"><span class="linenos">56</span></a>
+</span><span id="ModelLoader.__init__-57"><a href="#ModelLoader.__init__-57"><span class="linenos">57</span></a>            <span class="n">config</span> <span class="o">=</span> <span class="n">payload</span><span class="p">[</span><span class="s2">"config"</span><span class="p">]</span>
+</span><span id="ModelLoader.__init__-58"><a href="#ModelLoader.__init__-58"><span class="linenos">58</span></a>            <span class="n">model</span> <span class="o">=</span> <span class="n">Net</span><span class="p">(</span>
+</span><span id="ModelLoader.__init__-59"><a href="#ModelLoader.__init__-59"><span class="linenos">59</span></a>                <span class="n">input_dim</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"input_dim"</span><span class="p">],</span>
+</span><span id="ModelLoader.__init__-60"><a href="#ModelLoader.__init__-60"><span class="linenos">60</span></a>                <span class="n">hidden_sizes</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">config</span><span class="p">[</span><span class="s2">"hidden_sizes"</span><span class="p">]),</span>
+</span><span id="ModelLoader.__init__-61"><a href="#ModelLoader.__init__-61"><span class="linenos">61</span></a>                <span class="n">num_classes</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"num_classes"</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+</span><span id="ModelLoader.__init__-62"><a href="#ModelLoader.__init__-62"><span class="linenos">62</span></a>                <span class="n">activation_function</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"activation_function"</span><span class="p">],</span>
+</span><span id="ModelLoader.__init__-63"><a href="#ModelLoader.__init__-63"><span class="linenos">63</span></a>                <span class="n">regularization</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"regularization"</span><span class="p">],</span>
+</span><span id="ModelLoader.__init__-64"><a href="#ModelLoader.__init__-64"><span class="linenos">64</span></a>                <span class="n">reg_param</span><span class="o">=</span><span class="n">config</span><span class="p">[</span><span class="s2">"reg_param"</span><span class="p">],</span>
+</span><span id="ModelLoader.__init__-65"><a href="#ModelLoader.__init__-65"><span class="linenos">65</span></a>            <span class="p">)</span>
+</span><span id="ModelLoader.__init__-66"><a href="#ModelLoader.__init__-66"><span class="linenos">66</span></a>            <span class="n">model</span><span class="o">.</span><span class="n">load_state_dict</span><span class="p">(</span><span class="n">payload</span><span class="p">[</span><span class="s2">"state_dict"</span><span class="p">])</span>
+</span><span id="ModelLoader.__init__-67"><a href="#ModelLoader.__init__-67"><span class="linenos">67</span></a>
+</span><span id="ModelLoader.__init__-68"><a href="#ModelLoader.__init__-68"><span class="linenos">68</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+</span><span id="ModelLoader.__init__-69"><a href="#ModelLoader.__init__-69"><span class="linenos">69</span></a>        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">eval</span><span class="p">()</span>
 </span></pre></div>
 
 
@@ -521,28 +419,6 @@ weights when no model has been trained yet.</li>
         
     </div>
     <a class="headerlink" href="#ModelLoader.device"></a>
-    
-    
-
-                            </div>
-                            <div id="ModelLoader.checkpoint" class="classattr">
-                                <div class="attr variable">
-            <span class="name">checkpoint</span><span class="annotation">: pathlib._local.Path | None</span>
-
-        
-    </div>
-    <a class="headerlink" href="#ModelLoader.checkpoint"></a>
-    
-    
-
-                            </div>
-                            <div id="ModelLoader.is_trained" class="classattr">
-                                <div class="attr variable">
-            <span class="name">is_trained</span>
-
-        
-    </div>
-    <a class="headerlink" href="#ModelLoader.is_trained"></a>
     
     
 
@@ -569,43 +445,32 @@ weights when no model has been trained yet.</li>
 
     </div>
     <a class="headerlink" href="#ModelLoader.make_prediction"></a>
-            <div class="pdoc-code codehilite"><pre><span></span><span id="ModelLoader.make_prediction-137"><a href="#ModelLoader.make_prediction-137"><span class="linenos">137</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">make_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-</span><span id="ModelLoader.make_prediction-138"><a href="#ModelLoader.make_prediction-138"><span class="linenos">138</span></a><span class="w">        </span><span class="sd">"""Turn an audio file into digit probabilities.</span>
-</span><span id="ModelLoader.make_prediction-139"><a href="#ModelLoader.make_prediction-139"><span class="linenos">139</span></a>
-</span><span id="ModelLoader.make_prediction-140"><a href="#ModelLoader.make_prediction-140"><span class="linenos">140</span></a><span class="sd">        - Loads the file at its native sample rate, mixed down to mono</span>
-</span><span id="ModelLoader.make_prediction-141"><a href="#ModelLoader.make_prediction-141"><span class="linenos">141</span></a><span class="sd">        - Extracts the 26 MFCC features used in training</span>
-</span><span id="ModelLoader.make_prediction-142"><a href="#ModelLoader.make_prediction-142"><span class="linenos">142</span></a><span class="sd">        - Converts them into a ``(1, 26)`` float32 tensor</span>
-</span><span id="ModelLoader.make_prediction-143"><a href="#ModelLoader.make_prediction-143"><span class="linenos">143</span></a><span class="sd">        - Returns the probabilities of the 10 digits</span>
-</span><span id="ModelLoader.make_prediction-144"><a href="#ModelLoader.make_prediction-144"><span class="linenos">144</span></a>
-</span><span id="ModelLoader.make_prediction-145"><a href="#ModelLoader.make_prediction-145"><span class="linenos">145</span></a><span class="sd">        Parameters</span>
-</span><span id="ModelLoader.make_prediction-146"><a href="#ModelLoader.make_prediction-146"><span class="linenos">146</span></a><span class="sd">        ----------</span>
-</span><span id="ModelLoader.make_prediction-147"><a href="#ModelLoader.make_prediction-147"><span class="linenos">147</span></a><span class="sd">        audio_path : str</span>
-</span><span id="ModelLoader.make_prediction-148"><a href="#ModelLoader.make_prediction-148"><span class="linenos">148</span></a><span class="sd">            Path to the audio file, e.g. the filepath a ``gr.Audio`` component</span>
-</span><span id="ModelLoader.make_prediction-149"><a href="#ModelLoader.make_prediction-149"><span class="linenos">149</span></a><span class="sd">            hands to its callback.</span>
-</span><span id="ModelLoader.make_prediction-150"><a href="#ModelLoader.make_prediction-150"><span class="linenos">150</span></a>
-</span><span id="ModelLoader.make_prediction-151"><a href="#ModelLoader.make_prediction-151"><span class="linenos">151</span></a><span class="sd">        Returns</span>
-</span><span id="ModelLoader.make_prediction-152"><a href="#ModelLoader.make_prediction-152"><span class="linenos">152</span></a><span class="sd">        -------</span>
-</span><span id="ModelLoader.make_prediction-153"><a href="#ModelLoader.make_prediction-153"><span class="linenos">153</span></a><span class="sd">        numpy.ndarray</span>
-</span><span id="ModelLoader.make_prediction-154"><a href="#ModelLoader.make_prediction-154"><span class="linenos">154</span></a><span class="sd">            Probability vector of shape ``(10,)``.</span>
-</span><span id="ModelLoader.make_prediction-155"><a href="#ModelLoader.make_prediction-155"><span class="linenos">155</span></a>
-</span><span id="ModelLoader.make_prediction-156"><a href="#ModelLoader.make_prediction-156"><span class="linenos">156</span></a><span class="sd">        Raises</span>
-</span><span id="ModelLoader.make_prediction-157"><a href="#ModelLoader.make_prediction-157"><span class="linenos">157</span></a><span class="sd">        ------</span>
-</span><span id="ModelLoader.make_prediction-158"><a href="#ModelLoader.make_prediction-158"><span class="linenos">158</span></a><span class="sd">        RuntimeError</span>
-</span><span id="ModelLoader.make_prediction-159"><a href="#ModelLoader.make_prediction-159"><span class="linenos">159</span></a><span class="sd">            If no trained model is loaded: with random weights the numbers</span>
-</span><span id="ModelLoader.make_prediction-160"><a href="#ModelLoader.make_prediction-160"><span class="linenos">160</span></a><span class="sd">            would look like predictions without meaning anything.</span>
-</span><span id="ModelLoader.make_prediction-161"><a href="#ModelLoader.make_prediction-161"><span class="linenos">161</span></a><span class="sd">        """</span>
-</span><span id="ModelLoader.make_prediction-162"><a href="#ModelLoader.make_prediction-162"><span class="linenos">162</span></a>        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_trained</span><span class="p">:</span>
-</span><span id="ModelLoader.make_prediction-163"><a href="#ModelLoader.make_prediction-163"><span class="linenos">163</span></a>            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-</span><span id="ModelLoader.make_prediction-164"><a href="#ModelLoader.make_prediction-164"><span class="linenos">164</span></a>                <span class="s2">"No trained model is loaded: train a model and save it with"</span>
-</span><span id="ModelLoader.make_prediction-165"><a href="#ModelLoader.make_prediction-165"><span class="linenos">165</span></a>                <span class="s2">" sdoml_task1.modeling.train.save_run() first."</span>
-</span><span id="ModelLoader.make_prediction-166"><a href="#ModelLoader.make_prediction-166"><span class="linenos">166</span></a>            <span class="p">)</span>
-</span><span id="ModelLoader.make_prediction-167"><a href="#ModelLoader.make_prediction-167"><span class="linenos">167</span></a>        <span class="kn">from</span><span class="w"> </span><span class="nn">sdoml_task1.features</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_features</span>
-</span><span id="ModelLoader.make_prediction-168"><a href="#ModelLoader.make_prediction-168"><span class="linenos">168</span></a>        <span class="kn">import</span><span class="w"> </span><span class="nn">librosa</span>
-</span><span id="ModelLoader.make_prediction-169"><a href="#ModelLoader.make_prediction-169"><span class="linenos">169</span></a>
-</span><span id="ModelLoader.make_prediction-170"><a href="#ModelLoader.make_prediction-170"><span class="linenos">170</span></a>        <span class="n">audio_array</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">audio_path</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span id="ModelLoader.make_prediction-171"><a href="#ModelLoader.make_prediction-171"><span class="linenos">171</span></a>        <span class="n">features</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span><span class="n">audio_array</span><span class="p">,</span> <span class="n">sample_rate</span><span class="p">)</span>
-</span><span id="ModelLoader.make_prediction-172"><a href="#ModelLoader.make_prediction-172"><span class="linenos">172</span></a>        <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span id="ModelLoader.make_prediction-173"><a href="#ModelLoader.make_prediction-173"><span class="linenos">173</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <div class="pdoc-code codehilite"><pre><span></span><span id="ModelLoader.make_prediction-113"><a href="#ModelLoader.make_prediction-113"><span class="linenos">113</span></a>    <span class="k">def</span><span class="w"> </span><span class="nf">make_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">audio_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+</span><span id="ModelLoader.make_prediction-114"><a href="#ModelLoader.make_prediction-114"><span class="linenos">114</span></a><span class="w">        </span><span class="sd">"""Turn an audio file into digit probabilities.</span>
+</span><span id="ModelLoader.make_prediction-115"><a href="#ModelLoader.make_prediction-115"><span class="linenos">115</span></a>
+</span><span id="ModelLoader.make_prediction-116"><a href="#ModelLoader.make_prediction-116"><span class="linenos">116</span></a><span class="sd">        - Loads the file at its native sample rate, mixed down to mono</span>
+</span><span id="ModelLoader.make_prediction-117"><a href="#ModelLoader.make_prediction-117"><span class="linenos">117</span></a><span class="sd">        - Extracts the 26 MFCC features used in training</span>
+</span><span id="ModelLoader.make_prediction-118"><a href="#ModelLoader.make_prediction-118"><span class="linenos">118</span></a><span class="sd">        - Converts them into a ``(1, 26)`` float32 tensor</span>
+</span><span id="ModelLoader.make_prediction-119"><a href="#ModelLoader.make_prediction-119"><span class="linenos">119</span></a><span class="sd">        - Returns the probabilities of the 10 digits</span>
+</span><span id="ModelLoader.make_prediction-120"><a href="#ModelLoader.make_prediction-120"><span class="linenos">120</span></a>
+</span><span id="ModelLoader.make_prediction-121"><a href="#ModelLoader.make_prediction-121"><span class="linenos">121</span></a><span class="sd">        Parameters</span>
+</span><span id="ModelLoader.make_prediction-122"><a href="#ModelLoader.make_prediction-122"><span class="linenos">122</span></a><span class="sd">        ----------</span>
+</span><span id="ModelLoader.make_prediction-123"><a href="#ModelLoader.make_prediction-123"><span class="linenos">123</span></a><span class="sd">        audio_path : str</span>
+</span><span id="ModelLoader.make_prediction-124"><a href="#ModelLoader.make_prediction-124"><span class="linenos">124</span></a><span class="sd">            Path to the audio file, e.g. the filepath a ``gr.Audio`` component</span>
+</span><span id="ModelLoader.make_prediction-125"><a href="#ModelLoader.make_prediction-125"><span class="linenos">125</span></a><span class="sd">            hands to its callback.</span>
+</span><span id="ModelLoader.make_prediction-126"><a href="#ModelLoader.make_prediction-126"><span class="linenos">126</span></a>
+</span><span id="ModelLoader.make_prediction-127"><a href="#ModelLoader.make_prediction-127"><span class="linenos">127</span></a><span class="sd">        Returns</span>
+</span><span id="ModelLoader.make_prediction-128"><a href="#ModelLoader.make_prediction-128"><span class="linenos">128</span></a><span class="sd">        -------</span>
+</span><span id="ModelLoader.make_prediction-129"><a href="#ModelLoader.make_prediction-129"><span class="linenos">129</span></a><span class="sd">        numpy.ndarray</span>
+</span><span id="ModelLoader.make_prediction-130"><a href="#ModelLoader.make_prediction-130"><span class="linenos">130</span></a><span class="sd">            Probability vector of shape ``(10,)``.</span>
+</span><span id="ModelLoader.make_prediction-131"><a href="#ModelLoader.make_prediction-131"><span class="linenos">131</span></a>
+</span><span id="ModelLoader.make_prediction-132"><a href="#ModelLoader.make_prediction-132"><span class="linenos">132</span></a><span class="sd">        Raises</span>
+</span><span id="ModelLoader.make_prediction-133"><a href="#ModelLoader.make_prediction-133"><span class="linenos">133</span></a><span class="sd">        ------</span>
+</span><span id="ModelLoader.make_prediction-134"><a href="#ModelLoader.make_prediction-134"><span class="linenos">134</span></a><span class="sd">        """</span>
+</span><span id="ModelLoader.make_prediction-135"><a href="#ModelLoader.make_prediction-135"><span class="linenos">135</span></a>        <span class="n">audio_array</span><span class="p">,</span> <span class="n">sample_rate</span> <span class="o">=</span> <span class="n">librosa</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">audio_path</span><span class="p">,</span> <span class="n">sr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mono</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span id="ModelLoader.make_prediction-136"><a href="#ModelLoader.make_prediction-136"><span class="linenos">136</span></a>        <span class="n">features</span> <span class="o">=</span> <span class="n">extract_features</span><span class="p">(</span><span class="n">audio_array</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">sample_rate</span><span class="p">))</span>
+</span><span id="ModelLoader.make_prediction-137"><a href="#ModelLoader.make_prediction-137"><span class="linenos">137</span></a>        <span class="n">X</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">features</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span id="ModelLoader.make_prediction-138"><a href="#ModelLoader.make_prediction-138"><span class="linenos">138</span></a>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
 </span></pre></div>
 
 
@@ -630,13 +495,8 @@ hands to its callback.</li>
 
 <ul>
 <li><strong>numpy.ndarray</strong>: Probability vector of shape <code>(10,)</code>.</li>
-</ul>
-
-<h6 id="raises">Raises</h6>
-
-<ul>
-<li><strong>RuntimeError</strong>: If no trained model is loaded: with random weights the numbers
-would look like predictions without meaning anything.</li>
+<li><strong>Raises</strong></li>
+<li><strong>------</strong></li>
 </ul>
 </div>
 
