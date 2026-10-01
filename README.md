@@ -13,13 +13,16 @@ In order to run the jupyter notebook, you can use `uv sync` to create an environ
 Additionally, you can use the Docker image that's been already built. Please keep in mind that this iamge is around 7GB, mainly due to the dependencies used, so it might take some time to download.
 
 ```bash
-# Download the image
-docker pull alvarocrespo02/sdoml-demo
-
-# Run the app
-docker run -p 7860:7860 alvarocrespo02/sdoml-demo
+docker pull ametslortek/sdoml-demo:latest
 ```
-The app runs on port 7860, so please make sure you are not using that port before running the app.
+
+Then to run the project, we also need to expose the containers network, so may vary between OSes.
+
+```bash
+docker run --network=host ametslortek/sdoml-demo:latest
+```
+
+The app runs on port 7861, so please make sure you are not using that port before running the app.
 
 ### Dependency Management with uv
 This project uses [uv](https://docs.astral.sh/uv/) for dependency management and virtual environment handling.
@@ -33,20 +36,6 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
-### Deploy with a docker image
-
-We have uploaded our interactive demo to docker hub so a single package stores the needed dependencies to run the demo.
-Can be downloaded from:
-
-```bash
-docker pull ametslortek/sdoml-demo:latest
-```
-
-Then to run the project, we also need to expose the containers network, so may vary between OSes.
-
-```bash
-docker run --network=host ametslortek/sdoml-demo:latest
-```
 
 With this, the interactive UI will run in localhost:7861
 
