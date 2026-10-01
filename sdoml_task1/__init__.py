@@ -1,12 +1,20 @@
 """
-Spoken digit classification (SDOML Task 1).
+<!-- -->
 
  Project Description
 -------------------
-This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST)
-to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a
-multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a
-final output layer of 10 neurons. It uses the Adam optimizer and the cross-entropy loss function.
+This package trains a neural network model to predict numbers from 0 to 9 based on audio input using the 
+[Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST). The model is a multilayer perceptron 
+with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. 
+It uses the Adam optimizer and the cross-entropy loss function.
+
+The code is organized into the following modules:
+
+* Dataset downloading and loading (`sdoml_task1.dataset`)
+* Audio feature extraction and preprocessing (`sdoml_task1.features`)
+* Model training and inference (`sdoml_task1.modeling`)
+* Visualization and result analysis (`sdoml_task1.plots`)
+* Project configuration (`sdoml_task1.config`)
 
  Usage
 -----
