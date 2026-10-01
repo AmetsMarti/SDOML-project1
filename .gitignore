@@ -24,7 +24,7 @@ data/interim/*
 data/raw/.gitkeep
 data/processed/.gitkeep
 data/interim/.gitkeep
-Report.typ
+# Report.typ
 models/*
 models/*
 models/*
