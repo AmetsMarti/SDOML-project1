@@ -26,6 +26,7 @@
             <ul>
                 <li><a href="#project-description">Project description</a></li>
                 <li><a href="#usage">Usage</a></li>
+                <li><a href="#project-organization">Project Organization</a></li>
             </ul>
 
 
@@ -76,13 +77,13 @@
                     <ol>
                         <li><code>00_download_dataset.ipynb</code>: Download the dataset, feature extraction and dataset visualization.</li>
                         <li><code>01_audio_training.ipynb</code>: Model training.</li>
-                        <li><code>02_analysis_part.ipynb</code>: Result analysis.</li>
-                        <li><code>03_gradio_interface.ipynb</code>: The Gradio app.</li>
+                        <li><code>02_analysis_part.ipynb</code>: Result analysis and visualization.</li>
+                        <li><code>03_gradio_interface.ipynb</code>: The gradio app.</li>
                     </ol>
 
                     <p>The notebooks are there for simplicity, but the detailed functions can be found in <code>sdoml_task1/</code></p>
                     
-                    <p>Additionally, you can use the Docker image that's been already built. Please keep in mind that this image is around 7GB, mainly due to the dependencies used, so it might take some time to download.</p>
+                    <p>Additionally, there is a Docker image available to test the gradio app. Please keep in mind that this image is around 7GB, mainly due to the dependencies used, so it might take some time to download.</p>
                     <div class="pdoc-code codehilite">
 <pre><span></span><code><span class="c1"># Download the image</span>
 docker<span class="w"> </span>pull<span class="w"> </span>alvarocrespo02/sdoml-demo
