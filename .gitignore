@@ -6,7 +6,12 @@ __pycache__/
 *.egg-info/
 dist/
 build/
-assets/
+
+assets/**
+!assets/model_analysis/
+!assets/model_analysis/.gitkeep
+!assets/dataset_analysis/
+!assets/dataset_analysis/.gitkeep
 
 .ipynb_checkpoints/
 .ruff_cache/
@@ -15,11 +20,12 @@ data/raw/*
 data/processed/*.csv
 data/processed/*.parquet
 data/processed/*
+data/processed/*.pkl
 data/interim/*
-!data/raw/.gitkeep
-!data/processed/.gitkeep
-!data/interim/.gitkeep
-Report.typ
+data/raw/.gitkeep
+data/processed/.gitkeep
+data/interim/.gitkeep
+# Report.typ
 models/*
 models/*
 models/*
@@ -35,5 +41,5 @@ Report.pdf
 # OS
 .DS_Store
 Thumbs.db
-pyproject.toml
+# pyproject.toml
 

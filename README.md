@@ -6,10 +6,20 @@
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://ametsmarti.github.io/SDOML-project1/)
 
 ### Project description
-This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. It uses the Adam optimizer and the cross-entropy loss function.
-
+This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. 
 ### Running the code
 In order to run the jupyter notebook, you can use `uv sync` to create an environment and synchronize the dependencies. Depending on your code editor, you might need to manually select the created environment as a Python kernel. For a more detailed description of all the project's requirements, please check `pyproject.toml`. The notebooks are divided into two: The 00 notebook downloads and visualizes the data. The 01 notebooks performs the feature extracion and model training.
+
+Additionally, you can use the Docker image that's been already built. Please keep in mind that this iamge is around 7GB, mainly due to the dependencies used, so it might take some time to download.
+
+```bash
+# Download the image
+docker pull alvarocrespo02/sdoml-demo
+
+# Run the app
+docker run -p 7860:7860 alvarocrespo02/sdoml-demo
+```
+The app runs on port 7860, so please make sure you are not using that port before running the app.
 
 ### Dependency Management with uv
 This project uses [uv](https://docs.astral.sh/uv/) for dependency management and virtual environment handling.
@@ -22,6 +32,23 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Create virtual environment and install dependencies
 uv sync
 ```
+
+### Deploy with a docker image
+
+We have uploaded our interactive demo to docker hub so a single package stores the needed dependencies to run the demo.
+Can be downloaded from:
+
+```bash
+docker pull ametslortek/sdoml-demo:latest
+```
+
+Then to run the project, we also need to expose the containers network, so may vary between OSes.
+
+```bash
+docker run --network=host ametslortek/sdoml-demo:latest
+```
+
+With this, the interactive UI will run in localhost:7861
 
 ### Documentation
 
