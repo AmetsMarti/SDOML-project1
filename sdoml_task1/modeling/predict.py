@@ -13,7 +13,6 @@ ModelLoader
 
 from pathlib import Path
 import pickle
-import re
 import warnings
 
 import librosa
@@ -21,13 +20,9 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 
-from sdoml_task1.config import MODEL_DIR, PROJECT_DIR
+from sdoml_task1.config import MODEL_DIR
 from sdoml_task1.features import extract_features
 from sdoml_task1.modeling.model import Net
-
-RUNS_DIR = PROJECT_DIR / "runs"
-"""Directory holding one subfolder per training run, each with a ``model.pt``."""
-
 
 class ModelLoader:
     """Inference wrapper around a trained :class:`Net`.
@@ -37,10 +32,6 @@ class ModelLoader:
     model : Net, optional
         An already-built network. When omitted, the checkpoint resolved by
         ``run_id`` is loaded instead.
-    run_id : str, optional
-        UUID of the run to load from ``runs/``. When omitted,
-        ``models/model.pt`` is used if it exists, otherwise the most recently
-        written checkpoint under ``runs/``.
     device : str or torch.device, optional
         Device to run the forward pass on. Defaults to CPU so the loader also
         works on machines without CUDA.
@@ -57,8 +48,8 @@ class ModelLoader:
     Raises
     ------
     FileNotFoundError
-        If an explicit ``run_id`` does not exist. Without ``run_id`` a missing
-        checkpoint is not an error: the loader falls back to random weights.
+        If ``models/model.pt`` does not exist. The loader falls back to random
+        weights when no model has been trained yet.
     ValueError
         If the checkpoint does not describe a network :class:`Net` can rebuild.
     """
@@ -66,7 +57,6 @@ class ModelLoader:
     def __init__(
         self,
         model: Net | None = None,
-        run_id: str | None = None,
         device: str | torch.device = "cpu",
     ) -> None:
         self.device = torch.device(device)
@@ -75,14 +65,10 @@ class ModelLoader:
 
         if model is None:
             try:
-                checkpoint = self._resolve_checkpoint(run_id)
-                state_dict = torch.load(checkpoint, map_location="cpu", weights_only=True)
-                model = self._build_model(state_dict, checkpoint)
+                checkpoint = self._resolve_checkpoint()
+                payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
+                model = self._build_model(payload, checkpoint)
             except FileNotFoundError:
-                # Without an explicit run_id a missing checkpoint is not fatal:
-                # the interface must still start, so we fall back to Net() below.
-                if run_id is not None:
-                    raise
                 checkpoint = None
             except (OSError, EOFError, ValueError, RuntimeError, pickle.UnpicklingError) as error:
                 warnings.warn(f"{checkpoint} is unusable ({error}); starting untrained.")
@@ -97,83 +83,36 @@ class ModelLoader:
         self.model = model.to(self.device)
         self.model.eval()
 
-    @classmethod
-    def _resolve_checkpoint(cls, run_id: str | None = None) -> Path:
-        """Pick the checkpoint to load: ``run_id``, the published model, then the newest run.
-
-        Parameters
-        ----------
-        run_id : str, optional
-            UUID of a run under ``runs/``. When given, no fallback is used.
+    @staticmethod
+    def _resolve_checkpoint() -> Path:
+        """Return the latest model checkpoint.
 
         Returns
         -------
         pathlib.Path
-            Path to an existing ``model.pt``.
+            Path to ``models/model.pt``.
 
         Raises
         ------
         FileNotFoundError
-            If neither the published model nor any run holds a checkpoint.
+            If the latest model has not been saved yet.
         """
-        if run_id is None:
-            published = MODEL_DIR / "model.pt"
-            if published.is_file():
-                return published
-            try:
-                return cls._latest_checkpoint()
-            except FileNotFoundError:
-                raise FileNotFoundError(
-                    f"No checkpoint found: expected {published} or a model.pt under {RUNS_DIR}."
-                    " Train a model first (notebooks/01_audio_training.ipynb) and save it with"
-                    " sdoml_task1.modeling.train.save_run()."
-                ) from None
-        return cls._latest_checkpoint(run_id)
+        checkpoint = MODEL_DIR / "model.pt"
+        if not checkpoint.is_file():
+            raise FileNotFoundError(
+                f"No latest model found at {checkpoint}. Train a model first and save it with"
+                " sdoml_task1.modeling.train.save_run()."
+            )
+        return checkpoint
 
     @staticmethod
-    def _latest_checkpoint(run_id: str | None = None) -> Path:
-        """Return the ``model.pt`` of a run, by id or most recently written.
+    def _build_model(payload: dict, checkpoint: Path) -> Net:
+        """Build a :class:`Net` from a self-describing checkpoint.
 
         Parameters
         ----------
-        run_id : str, optional
-            UUID of the run. When ``None``, the newest checkpoint in ``runs/``
-            is selected by modification time.
-
-        Returns
-        -------
-        pathlib.Path
-            Path to the checkpoint file.
-
-        Raises
-        ------
-        FileNotFoundError
-            If the run does not exist or ``runs/`` holds no checkpoint.
-        """
-        if run_id is not None:
-            checkpoint = RUNS_DIR / run_id / "model.pt"
-            if not checkpoint.is_file():
-                raise FileNotFoundError(f"No checkpoint for run {run_id!r}: {checkpoint}")
-            return checkpoint
-
-        checkpoints = sorted(RUNS_DIR.glob("*/model.pt"), key=lambda p: p.stat().st_mtime)
-        if not checkpoints:
-            raise FileNotFoundError(f"No checkpoint found under {RUNS_DIR}")
-        return checkpoints[-1]
-
-    @staticmethod
-    def _build_model(state_dict: dict[str, torch.Tensor], checkpoint: Path) -> Net:
-        """Rebuild a :class:`Net` from the shapes stored in a checkpoint.
-
-        The topology (input size, hidden layers, number of classes) is read
-        from the weight matrices, and legacy layer names such as ``fc1``/``fc3``
-        are mapped onto the current ``lst.*`` names, so checkpoints written
-        before the model was refactored keep loading.
-
-        Parameters
-        ----------
-        state_dict : dict
-            Weights as read from a checkpoint file.
+        payload : dict
+            Checkpoint containing ``state_dict`` and ``config`` entries.
         checkpoint : pathlib.Path
             Only used to point at the offending file in error messages.
 
@@ -185,42 +124,21 @@ class ModelLoader:
         Raises
         ------
         ValueError
-            If the tensors do not describe a stack of ``Net`` linear layers.
+            If the checkpoint does not contain the required entries.
         """
+        if not isinstance(payload, dict) or not {"state_dict", "config"} <= payload.keys():
+            raise ValueError(f"{checkpoint} is not a latest-model checkpoint")
 
-        def layer_index(key: str) -> int:
-            digits = re.findall(r"\d+", key)
-            return int(digits[-1]) if digits else -1
-
-        weight_keys = sorted((k for k, v in state_dict.items() if v.ndim == 2), key=layer_index)
-        bias_keys = sorted((k for k, v in state_dict.items() if v.ndim == 1), key=layer_index)
-        shapes = [tuple(state_dict[k].shape) for k in weight_keys]
-
-        if len(shapes) < 2:
-            raise ValueError(
-                f"{checkpoint} does not describe a Net: found {len(shapes)} linear layer(s),"
-                " at least 2 are required (one hidden layer plus the output layer)."
-            )
-        if len(bias_keys) != len(weight_keys):
-            raise ValueError(
-                f"{checkpoint} mixes biased and bias-free layers:"
-                f" {len(weight_keys)} weight tensors vs {len(bias_keys)} bias tensors."
-            )
-        for i, (out_dim, in_dim) in enumerate(shapes):
-            if i and in_dim != shapes[i - 1][0]:
-                raise ValueError(
-                    f"{checkpoint} has inconsistent layer shapes {shapes}: layer {i} takes"
-                    f" {in_dim} inputs but layer {i - 1} produces {shapes[i - 1][0]}."
-                )
-
-        input_dim = shapes[0][1]
-        hidden_sizes = tuple(out_dim for out_dim, _ in shapes[:-1])
-        num_classes = shapes[-1][0]
-
-        model = Net(input_dim=input_dim, hidden_sizes=hidden_sizes, num_classes=num_classes)
-        canonical = {f"lst.{i}.weight": state_dict[k] for i, k in enumerate(weight_keys)}
-        canonical.update({f"lst.{i}.bias": state_dict[k] for i, k in enumerate(bias_keys)})
-        model.load_state_dict(canonical)
+        config = payload["config"]
+        model = Net(
+            input_dim=config["input_dim"],
+            hidden_sizes=tuple(config["hidden_sizes"]),
+            num_classes=config.get("num_classes", 10),
+            activation_function=config["activation_function"],
+            regularization=config["regularization"],
+            reg_param=config["reg_param"],
+        )
+        model.load_state_dict(payload["state_dict"])
         return model
 
     @torch.no_grad()
