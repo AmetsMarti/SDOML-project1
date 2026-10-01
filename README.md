@@ -8,6 +8,17 @@ This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilk
 ### Running the code
 In order to run the jupyter notebook, you can use `uv sync` to create an environment and synchronize the dependencies. Depending on your code editor, you might need to manually select the created environment as a Python kernel. For a more detailed description of all the project's requirements, please check `pyproject.toml`. The notebooks are divided into two: The 00 notebook downloads and visualizes the data. The 01 notebooks performs the feature extracion and model training.
 
+Additionally, you can use the Docker image that's been already built. Please keep in mind that this iamge is around 7GB, mainly due to the dependencies used, so it might take some time to download.
+
+```bash
+# Download the image
+docker pull alvarocrespo02/sdoml-demo
+
+# Run the app
+docker run -p 7860:7860 alvarocrespo02/sdoml-demo
+```
+The app runs on port 7860, so please make sure you are not using that port before running the app.
+
 ### Dependency Management with uv
 This project uses [uv](https://docs.astral.sh/uv/) for dependency management and virtual environment handling.
 
