@@ -31,6 +31,23 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 uv sync
 ```
 
+### Deploy with a docker image
+
+We have uploaded our interactive demo to docker hub so a single package stores the needed dependencies to run the demo.
+Can be downloaded from:
+
+```bash
+docker pull ametslortek/sdoml-demo:latest
+```
+
+Then to run the project, we also need to expose the containers network, so may vary between OSes.
+
+```bash
+docker run --network=host ametslortek/sdoml-demo:latest
+```
+
+With this, the interactive UI will run in localhost:7861
+
 ### Documentation
 ```bash
 # Using Make

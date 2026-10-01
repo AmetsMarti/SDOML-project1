@@ -3,21 +3,20 @@
 This module implements the training loop for the digit classification model,
 with optional L1 penalty, weight decay, early stopping and lr scheduling.
 """
-from sklearn.metrics import confusion_matrix
-import torch
-from torch import nn
+import pickle
+from pathlib import Path
 
 import numpy as np
+import torch
+from sklearn.metrics import confusion_matrix
+from torch import nn
 
 from torch.utils.data import DataLoader
 
 from sdoml_task1.dataset import AudioMNISTFeaturesDataset
 from sdoml_task1.modeling.model import Net
-
 from sdoml_task1.modeling.optimization import make_optimizer, make_scheduler
 
-from pathlib import Path
-import pickle
 
 def train(model, train_loader, val_loader, epochs=40, lr=1e-4, optimizer_name="Adam", scheduler_name=None, limit_epoch=10, device=None, on_epoch_end=None):
     """Train a classifier and return metrics per epoch.
@@ -161,10 +160,10 @@ def train(model, train_loader, val_loader, epochs=40, lr=1e-4, optimizer_name="A
     }
 
 def save_run(metrics, save_dir):
-    """Save a trained model and its training history.
+    """Save the latest model and its training history.
 
-    Creates ``model.pt`` (the model weights) and ``history.pkl``
-    (per-epoch metrics and the configuration) inside ``save_dir``.
+    Overwrites ``model.pt`` with the latest weights and model configuration.
+    The separate ``history.pkl`` file is kept for the analysis notebook.
 
     Parameters
     ----------
@@ -181,7 +180,13 @@ def save_run(metrics, save_dir):
     save_dir = Path(save_dir)
     save_dir.mkdir(parents=True, exist_ok=True)
 
-    torch.save(metrics["model"].state_dict(), save_dir / "model.pt")
+    torch.save(
+        {
+            "state_dict": metrics["model"].state_dict(),
+            "config": metrics["config"],
+        },
+        save_dir / "model.pt",
+    )
 
     history = {
         "total_loss_train": metrics["loss_train"],

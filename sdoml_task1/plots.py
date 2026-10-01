@@ -4,16 +4,75 @@ Every helper accepts an optional ``save_path`` and a ``show`` flag, so the same
 call works interactively and when writing the plots to ``reports/figures``.
 """
 
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.metrics import ConfusionMatrixDisplay
 
 
+def training_metrics_figure(metrics: dict, include_accuracy: bool = True) -> Figure:
+    """Build loss and optionally accuracy figures for training and validation."""
+    epochs = range(1, len(metrics["loss_train"]) + 1)
+    columns = 2 if include_accuracy else 1
+    fig, axes = plt.subplots(1, columns, figsize=(6 * columns, 4.5), squeeze=False)
+    axes = axes[0]
+
+    axes[0].plot(epochs, metrics["loss_train"], marker="o", markersize=3, label="Train loss")
+    axes[0].plot(epochs, metrics["loss_val"], marker="o", markersize=3, label="Validation loss")
+    axes[0].set_title("Loss")
+    axes[0].set_ylabel("Loss")
+
+    if include_accuracy:
+        axes[1].plot(epochs, metrics["accuracy_train"], marker="o", markersize=3, label="Train accuracy")
+        axes[1].plot(epochs, metrics["accuracy_val"], marker="o", markersize=3, label="Validation accuracy")
+        axes[1].set_title("Accuracy")
+        axes[1].set_ylabel("Accuracy")
+
+    for ax in axes:
+        ax.set_xlabel("Epoch")
+        ax.set_xticks(list(epochs))
+        ax.grid(True, alpha=0.3)
+        ax.legend()
+
+    fig.tight_layout()
+    return fig
+
+
+def loss_evolution_figure(metrics: dict) -> Figure:
+    """Build the train/validation loss figure."""
+    return training_metrics_figure(metrics, include_accuracy=False)
+
+
+def confusion_matrix_figure(cm: np.ndarray, epoch: int) -> Figure:
+    """Build a single confusion matrix figure.
+
+    Unlike :func:`plot_confusion_matrix_epoch` this returns the figure
+    instead of showing it, so it can be handed over to a UI component.
+
+    Parameters
+    ----------
+    cm : np.ndarray
+        Confusion matrix of shape ``(n_classes, n_classes)``.
+    epoch : int
+        Epoch number (used in the plot title).
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+    """
+    fig, ax = plt.subplots(figsize=(6, 5))
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=range(10))
+    disp.plot(ax=ax, cmap="Blues", colorbar=False, values_format="d")
+    ax.set_title(f"Confusion matrix - Epoch {epoch}")
+    fig.tight_layout()
+    return fig
+
+
 def plot_loss_accuracy(metrics: dict, save_path=None, show=True) -> None:
     """Plot training and validation loss/accuracy curves.
 
-    Creates a 2x2 subplot grid showing training loss, training accuracy,
-    validation loss, and validation accuracy across epochs.
+    Creates a two-panel figure showing loss and accuracy for training and
+    validation across epochs.
 
     Parameters
     ----------
@@ -27,42 +86,15 @@ def plot_loss_accuracy(metrics: dict, save_path=None, show=True) -> None:
     show : bool, default=True
         If True, display the figure. If False, close it without displaying.
     """
-    _, axs = plt.subplots(2, 2, figsize=(12, 8))
-    ax1, ax2, ax3, ax4 = axs.flatten()
-
-    ax1.plot(metrics["loss_train"])
-    ax1.set_xlabel("Epoch")
-    ax1.set_ylabel("Loss")
-    ax1.set_title("Training Loss")
-    ax1.grid()
-
-    ax2.plot(metrics["accuracy_train"])
-    ax2.set_xlabel("Epoch")
-    ax2.set_ylabel("Accuracy")
-    ax2.set_title("Training Accuracy")
-    ax2.grid()
-
-    ax3.plot(metrics["loss_val"])
-    ax3.set_xlabel("Epoch")
-    ax3.set_ylabel("Loss")
-    ax3.set_title("Validation Loss")
-    ax3.grid()
-
-    ax4.plot(metrics["accuracy_val"])
-    ax4.set_xlabel("Epoch")
-    ax4.set_ylabel("Accuracy")
-    ax4.set_title("Validation Accuracy")
-    ax4.grid()
-
-    plt.tight_layout()
+    fig = training_metrics_figure(metrics)
 
     if save_path is not None:
-        plt.savefig(save_path, dpi=150, bbox_inches="tight")
+        fig.savefig(save_path, dpi=150, bbox_inches="tight")
 
     if show:
-        plt.show()
+        fig.show()
     else:
-        plt.close()
+        plt.close(fig)
 
 
 def plot_confusion_matrices(confusion_matrices: list, save_path=None, show=True) -> None:
