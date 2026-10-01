@@ -69,6 +69,16 @@
                     <h3 id="running-the-code">Running the code</h3>
 
                     <p>In order to run the jupyter notebook, you can use <code>uv sync</code> to create an environment and synchronize the dependencies. Depending on your code editor, you might need to manually select the created environment as a Python kernel. For a more detailed description of all the project's requirements, please check <code>pyproject.toml</code>. The notebooks are divided into two: The 00 notebook downloads and visualizes the data. The 01 notebooks performs the feature extracion and model training.</p>
+                    <p>Additionally, you can use the Docker image that's been already built. Please keep in mind that this image is around 7GB, mainly due to the dependencies used, so it might take some time to download.</p>
+                    <div class="pdoc-code codehilite">
+<pre><span></span><code><span class="c1"># Download the image</span>
+docker<span class="w"> </span>pull<span class="w"> </span>alvarocrespo02/sdoml-demo
+
+<span class="c1"># Run the app</span>
+docker<span class="w"> </span>run<span class="w"> </span><span class="p">-</span>p<span class="w"> </span>7860:7860<span class="w"> </span>alvarocrespo02/sdoml-demo
+</code></pre>
+                    </div>
+
 
                     <h3 id="dependency-management-with-uv">Dependency Management with uv</h3>
 
@@ -77,24 +87,23 @@
                     <p><strong>Setup on a fresh system:</strong></p>
 
                     <div class="pdoc-code codehilite">
-                    <pre><span></span><code><span class="c1"># Install uv (if not already installed)</span>
-                    curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
+<pre><span></span><code><span class="c1"># Install uv (if not already installed)</span>
+curl<span class="w"> </span>-LsSf<span class="w"> </span>https://astral.sh/uv/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
 
-                    <span class="c1"># Create virtual environment and install dependencies</span>
-                    uv<span class="w"> </span>sync
-                    </code></pre>
+<span class="c1"># Create virtual environment and install dependencies</span>
+uv<span class="w"> </span>sync
+</code></pre>
                     </div>
 
                     <h3 id="documentation">Documentation</h3>
 
                     <div class="pdoc-code codehilite">
-                    <pre><span></span><code><span class="c1"># Using Make</span>
-                    make<span class="w"> </span>docs
-
-                    <span class="c1"># Or directly with pdoc</span>
-                    pdoc<span class="w"> </span>sdoml_task1<span class="w"> </span>-o<span class="w"> </span>docs<span class="w"> </span>--docformat<span class="w"> </span>numpy<span class="w"> </span>-t<span class="w"> </span>templates
-                    </code></pre>
-                    </div>
+<pre><span></span><code><span class="c1"># Using Make</span>
+make<span class="w"> </span>docs
+<span class="c1"># Or directly with pdoc</span>
+pdoc<span class="w"> </span>sdoml_task1<span class="w"> </span>-o<span class="w"> </span>docs<span class="w"> </span>--docformat<span class="w"> </span>numpy<span class="w"> </span>-t<span class="w"> </span>templates
+</code></pre>
+</div>
 
                     <p>The generated documentation will be available in the <code>docs/</code> directory. Open <code>docs/index.html</code> in a browser to view the documentation (it redirects to the package page, which starts with this README).
                     See the documentation in [<a href="https://ametsmarti.github.io/SDOML-project1/]">https://ametsmarti.github.io/SDOML-project1/]</a></p>
