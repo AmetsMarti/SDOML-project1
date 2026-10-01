@@ -12,13 +12,13 @@ ModelLoader
 """
 
 from pathlib import Path
-import pickle
-import warnings
 
+import librosa
 import numpy as np
 import torch
 
 from sdoml_task1.config import MODEL_DIR
+from sdoml_task1.features import extract_features
 from sdoml_task1.modeling.model import Net
 
 class ModelLoader:
@@ -32,20 +32,10 @@ class ModelLoader:
         Device to run the forward pass on. Defaults to CPU so the loader also
         works on machines without CUDA.
 
-    Attributes
-    ----------
-    is_trained : bool
-        ``False`` when no checkpoint was found and the network was built with
-        random weights. The UI uses it to warn that predictions are meaningless.
-    checkpoint : pathlib.Path or None
-        File the weights were read from, or ``None`` when a ``model`` was
-        passed in or no checkpoint exists.
-
     Raises
     ------
     FileNotFoundError
-        If ``models/model.pt`` does not exist. The loader falls back to random
-        weights when no model has been trained yet.
+        If ``models/model.pt`` does not exist.
     ValueError
         If the checkpoint does not contain model weights and configuration.
     """
@@ -56,37 +46,23 @@ class ModelLoader:
         device: str | torch.device = "cpu",
     ) -> None:
         self.device = torch.device(device)
-        self.checkpoint: Path | None = None
-        self.is_trained = model is not None
 
         if model is None:
-            try:
-                checkpoint = self._resolve_checkpoint()
-                payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
-                if not isinstance(payload, dict) or not {"state_dict", "config"} <= payload.keys():
-                    raise ValueError(f"{checkpoint} is not a latest-model checkpoint")
+            checkpoint = self._resolve_checkpoint()
+            payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
+            if not isinstance(payload, dict) or not {"state_dict", "config"} <= payload.keys():
+                raise ValueError(f"{checkpoint} is not a latest-model checkpoint")
 
-                config = payload["config"]
-                model = Net(
-                    input_dim=config["input_dim"],
-                    hidden_sizes=tuple(config["hidden_sizes"]),
-                    num_classes=config.get("num_classes", 10),
-                    activation_function=config["activation_function"],
-                    regularization=config["regularization"],
-                    reg_param=config["reg_param"],
-                )
-                model.load_state_dict(payload["state_dict"])
-            except FileNotFoundError:
-                checkpoint = None
-            except (OSError, EOFError, ValueError, RuntimeError, pickle.UnpicklingError) as error:
-                warnings.warn(f"{checkpoint} is unusable ({error}); starting untrained.")
-                checkpoint = None
-
-            if checkpoint is None:
-                model = Net()  # random weights: nothing has been trained yet
-            else:
-                self.checkpoint = checkpoint
-                self.is_trained = True
+            config = payload["config"]
+            model = Net(
+                input_dim=config["input_dim"],
+                hidden_sizes=tuple(config["hidden_sizes"]),
+                num_classes=config.get("num_classes", 10),
+                activation_function=config["activation_function"],
+                regularization=config["regularization"],
+                reg_param=config["reg_param"],
+            )
+            model.load_state_dict(payload["state_dict"])
 
         self.model = model.to(self.device)
         self.model.eval()
@@ -154,19 +130,8 @@ class ModelLoader:
 
         Raises
         ------
-        RuntimeError
-            If no trained model is loaded: with random weights the numbers
-            would look like predictions without meaning anything.
         """
-        if not self.is_trained:
-            raise RuntimeError(
-                "No trained model is loaded: train a model and save it with"
-                " sdoml_task1.modeling.train.save_run() first."
-            )
-        from sdoml_task1.features import extract_features
-        import librosa
-
         audio_array, sample_rate = librosa.load(audio_path, sr=None, mono=True)
-        features = extract_features(audio_array, sample_rate)
+        features = extract_features(audio_array, int(sample_rate))
         X = torch.tensor(features, dtype=torch.float32).unsqueeze(0)
         return self._predict(X)
