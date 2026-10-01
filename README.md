@@ -4,7 +4,7 @@
 *Amets Martiarena, Teva Philippe, Alvaro Crespo*
 
 ### Project description
-This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a multilayer perceptron with an input of 26 neurons, two hidden layers of 64 and 32 neurons, and a final output layer of 10 neurons. It uses the Adam optimizer and the cross-entropy loss function.
+This project uses the [Audio MNIST Dataset](https://huggingface.co/datasets/gilkeyio/AudioMNIST) to train a model that predicts numbers from 0 to 9 based on audio input. The neural network is a configurable MLP with different options to change: Number of layers, optimizer, scheduler...
 
 ### Running the code
 In order to run the jupyter notebook, you can use `uv sync` to create an environment and synchronize the dependencies. Depending on your code editor, you might need to manually select the created environment as a Python kernel. For a more detailed description of all the project's requirements, please check `pyproject.toml`. The notebooks are divided into two: The 00 notebook downloads and visualizes the data. The 01 notebooks performs the feature extracion and model training.
@@ -20,6 +20,23 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Create virtual environment and install dependencies
 uv sync
 ```
+
+### Deploy with a docker image
+
+We have uploaded our interactive demo to docker hub so a single package stores the needed dependencies to run the demo.
+Can be downloaded from:
+
+```bash
+docker pull ametslortek/sdoml-demo:latest
+```
+
+Then to run the project, we also need to expose the containers network, so may vary between OSes.
+
+```bash
+docker run --network=host ametslortek/sdoml-demo:latest
+```
+
+With this, the interactive UI will run in localhost:7861
 
 ### Documentation
 ```bash
